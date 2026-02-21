@@ -1,6 +1,6 @@
 from CTkMessagebox import CTkMessagebox
 from g4f import ChatCompletion, Provider
-from utils.variables import MODEL_MAP, APP_NAME, DISPLAY_APP_NAME, DEFAULT_SETTINGS, OPENROUTER_PUBLIC_API_KEY
+from utils.variables import MODEL_MAP, APP_NAME, DISPLAY_APP_NAME, DEFAULT_SETTINGS, ORPK
 import customtkinter as ctk
 import threading
 import json
@@ -30,7 +30,7 @@ def get_api_key(Window: "AssistantChatFrame", provider: Provider):
     if provider == Provider.PollinationsAI:
         api_key = Window.MainWindow.settings.get("PAIK", DEFAULT_SETTINGS["PAIK"])
     elif provider == Provider.OpenRouter:
-        api_key = OPENROUTER_PUBLIC_API_KEY
+        api_key = ORPK
     return api_key
 
 

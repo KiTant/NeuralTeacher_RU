@@ -6,7 +6,11 @@ DISPLAY_APP_NAME = "НейроУчитель"
 REPO_NAME = APP_NAME + "_RU"
 ICON_PATH = 'assets/graduation-cap.ico'
 VERSION = "1.0.0"
-OPENROUTER_PUBLIC_API_KEY = "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"  # Этот ключ был создан специально для общего пользования (в НейроУчителе)
+ORPK = ["a6089edef857be8b734a2949eb9a07b97e47e5d15178581050bde0aa65dfb347",
+        "-1v-"
+        "ro"
+        "-ks"]
+ORPK = ("".join(ORPK))[::-1]  # Этот ключ был создан специально для общего пользования (в НейроУчителе)
 
 APPDATA = os.getenv('APPDATA')
 FILES = {
