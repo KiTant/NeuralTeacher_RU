@@ -1,0 +1,52 @@
+{
+  "GPT-4": {
+    "Yqcloud": "gpt-4"
+  },
+  "GPT OSS 120B": {
+    "OpenRouter": "openai/gpt-oss-120b:free",
+    "Ollama": "gpt-oss:120b-cloud",
+    "DeepInfra": "openai/gpt-oss-120b",
+    "HuggingFace": "openai/gpt-oss-120b"
+  },
+  "Step 3.5 Flash": {
+    "OpenRouter": "stepfun/step-3.5-flash:free",
+    "DeepInfra": "stepfun-ai/Step-3.5-Flash"
+  },
+  "MiniMax M2.5": {
+    "OpenRouter": "minimax/minimax-m2.5:free",
+    "HuggingFace": "MiniMaxAI/MiniMax-M2.5",
+    "Ollama": "minimax-m2.5:cloud",
+    "DeepInfra": "MiniMaxAI/MiniMax-M2.5"
+  },
+  "Nemotron 3 Super": {
+    "OpenRouter": "nvidia/nemotron-3-super-120b-a12b:free",
+    "DeepInfra": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
+    "Ollama": "nemotron-3-super:cloud"
+  },
+  "Deepseek V3.2": {
+    "DeepInfra": "deepseek-ai/DeepSeek-V3.2",
+    "PollinationsAI": "deepseek",
+    "Ollama": "deepseek-v3.2:cloud",
+    "HuggingFace": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "Kimi K2.5": {
+    "DeepInfra": "moonshotai/Kimi-K2.5",
+    "HuggingFace": "moonshotai/Kimi-K2.5",
+    "Ollama": "kimi-k2.5:cloud"
+  },
+  "GLM-5": {
+    "PollinationsAI": "glm",
+    "HuggingFace": "zai-org/GLM-5",
+    "Ollama": "glm-5:cloud",
+    "DeepInfra": "zai-org/GLM-5"
+  },
+  "GPT-5 Nano": {
+    "PollinationsAI": "openai-fast"
+  },
+  "GPT-5 Mini": {
+    "PollinationsAI": "openai"
+  },
+  "Gemini 2.5 Flash Lite": {
+    "PollinationsAI": "gemini-fast"
+  }
+}

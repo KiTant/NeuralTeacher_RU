@@ -32,20 +32,11 @@ class AboutFrame(customtkinter.CTkFrame):
         self.telegram_channel_button = customtkinter.CTkButton(self, text="Перейти в Telegram канал",
                                                                command=lambda: open_link("https://t.me/+xb_ogXI6kZc0MDIy"))
         self.telegram_channel_button.grid(row=5, column=0, padx=20, pady=5, sticky="w")
-        self.paik_info = customtkinter.CTkLabel(self, text=f"Как получить PAIK? Посмотрите видео-инструкцию в Telegram канале (выше) или Youtube (ниже)\n"
-                                                           f"Информация о PAIK - для чего нужен? В программе НейроУчитель (в этой версии и возможно других) "
-                                                           f"используется большое кол-во моделей ИИ с провайдера Pollinations AI. Доступ к его моделям можно"
-                                                           f" получить, только если использовать API ключ.",
-                                                font=customtkinter.CTkFont(size=16, weight="bold"),
-                                                justify="left", wraplength=750)
-        self.paik_info.grid(row=6, column=0, padx=20, pady=(15, 5), sticky="w")
-        self.PAIK_guide_button = customtkinter.CTkButton(self, text="Перейти на видео-гайд по получению PAIK (на Youtube)",
-                                                         command=lambda: open_link("https://www.youtube.com/watch?v=RVGnYL8ORXU"))
-        self.PAIK_guide_button.grid(row=7, column=0, padx=20, pady=5, sticky="w")
-        self.copy_paste_info = customtkinter.CTkLabel(self,
-                                                      text="При вставке или копировании текста (в каких-либо однострочных полях) учтите, что раскладка"
-                                                           " вашей клавиатуры должна быть переключена на английский язык (в будущем это будет исправлено, чтобы"
-                                                           " каждый раз не переключаться)",
-                                                      font=customtkinter.CTkFont(size=16, weight="bold"),
-                                                      justify="left", wraplength=750)
-        self.copy_paste_info.grid(row=8, column=0, padx=20, pady=(15, 5), sticky="w")
+        self.api_key_info = customtkinter.CTkLabel(self, text=f"Если хотите посмотреть пример получения API ключа, то можете глянуть видео-инструкцию в Telegram "
+                                                              f"канале (выше) или Youtube (ниже)",
+                                                   font=customtkinter.CTkFont(size=16, weight="bold"),
+                                                   justify="left", wraplength=750)
+        self.api_key_info.grid(row=6, column=0, padx=20, pady=(15, 5), sticky="w")
+        self.api_key_guide_button = customtkinter.CTkButton(self, text="Перейти на видео по примеру получения API ключа (на Youtube)",
+                                                            command=lambda: open_link("https://www.youtube.com/watch?v=RVGnYL8ORXU"))
+        self.api_key_guide_button.grid(row=7, column=0, padx=20, pady=5, sticky="w")

@@ -4,7 +4,7 @@ import threading
 from PIL import Image
 from utils.helpers import resource_path
 from utils.settings_manager import settings_load
-from utils.variables import DEFAULT_SETTINGS, FILES, APPEARANCE_MODES, ICON_PATH
+from utils.variables import DEFAULT_SETTINGS, FILES, APPEARANCE_MODES, ICON_PATH, MODEL_MAP, PROVIDER_MAP
 from ui.navigation_frame import NavigationFrame
 from ui.tests_frame import TestsFrame
 from ui.explanation_frame import ExplanationFrame
@@ -40,6 +40,10 @@ class MainWindow(ctk.CTk):
         self.settings = DEFAULT_SETTINGS.copy()
         settings_load(self, FILES.get("settings_file"))
         self.after(100, lambda: self.iconbitmap(resource_path(ICON_PATH)))
+        if self.settings["ai_model"] not in MODEL_MAP:
+            self.settings["ai_model"] = DEFAULT_SETTINGS["ai_model"]
+        if self.settings["provider"] not in PROVIDER_MAP:
+            self.settings["provider"] = DEFAULT_SETTINGS["provider"]
 
         self.protocol("WM_DELETE_WINDOW", self.window_hide)
 

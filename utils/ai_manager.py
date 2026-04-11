@@ -1,37 +1,12 @@
 from CTkMessagebox import CTkMessagebox
 from g4f import ChatCompletion, Provider
-from utils.variables import MODEL_MAP, APP_NAME, DISPLAY_APP_NAME, DEFAULT_SETTINGS, ORPK
+from utils.variables import APP_NAME, DISPLAY_APP_NAME
+from utils.helpers import parse_json_safely, get_selected_model_info, get_api_key
 import customtkinter as ctk
 import threading
-import json
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ui.assistant_frame import AssistantChatFrame
-
-
-def parse_json_safely(text: str):
-    try:
-        return json.loads(text)
-    except Exception:
-        pass
-    start = text.find('{')
-    end = text.rfind('}')
-    if start != -1 and end != -1 and end > start:
-        candidate = text[start:end + 1]
-        try:
-            return json.loads(candidate)
-        except Exception:
-            return None
-    return None
-
-
-def get_api_key(Window: "AssistantChatFrame", provider: Provider):
-    api_key = None
-    if provider == Provider.PollinationsAI:
-        api_key = Window.MainWindow.settings.get("PAIK", DEFAULT_SETTINGS["PAIK"])
-    elif provider == Provider.OpenRouter:
-        api_key = ORPK
-    return api_key
 
 
 def send_message(Window: "AssistantChatFrame", event=None, message=None, system_prompt: str = None):
@@ -40,10 +15,12 @@ def send_message(Window: "AssistantChatFrame", event=None, message=None, system_
         return
 
     selected_model_name = Window.MainWindow.settings["ai_model"]
-    selected_model_info = MODEL_MAP.get(selected_model_name)
+    selected_provider = getattr(Provider, Window.MainWindow.settings["provider"], None)
+    selected_model_info = get_selected_model_info(selected_provider, selected_model_name)
     if not selected_model_info:
         Window.display_message({"role": APP_NAME,
-                                "content": f"Ошибка: Модель '{selected_model_name}' не найдена или не поддерживается.",
+                                "content": f"Ошибка: Модель '{selected_model_name}' с провайдером '{selected_provider.__name__}' "
+                                           f"не найдена или не поддерживается.",
                                 "model_name": DISPLAY_APP_NAME}, "bot")
         return
 
@@ -90,11 +67,13 @@ def regenerate_ai_response(Window: "AssistantChatFrame", ai_message_data, system
             Window.redraw_chat()
 
             selected_model_name = Window.MainWindow.settings["ai_model"]
-            selected_model_info = MODEL_MAP.get(selected_model_name)
+            selected_provider = getattr(Provider, Window.MainWindow.settings["provider"], None)
+            selected_model_info = get_selected_model_info(selected_provider, selected_model_name)
             if not selected_model_info:
                 Window.display_message({"role": APP_NAME,
-                                        "content": f'Ошибка: Модель "{selected_model_name}" не найдена или не поддерживается.',
-                                        "type": "text", "model_name": DISPLAY_APP_NAME}, "bot")
+                                        "content": f"Ошибка: Модель '{selected_model_name}' с провайдером '{selected_provider.__name__}' "
+                                                   f"не найдена или не поддерживается.",
+                                        "model_name": DISPLAY_APP_NAME}, "bot")
                 return
             selected_model, selected_provider = selected_model_info
             threading.Thread(
@@ -158,9 +137,11 @@ def request_test_config(Window, request_dict: dict, on_config=None):
     )
     Window.lock_input("Генерация теста...")
     selected_model_name = Window.MainWindow.settings["ai_model"]
-    selected_model_info = MODEL_MAP.get(selected_model_name)
+    selected_provider = getattr(Provider, Window.MainWindow.settings["provider"], None)
+    selected_model_info = get_selected_model_info(selected_provider, selected_model_name)
     if not selected_model_info:
-        CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка: Модель '{selected_model_name}' не найдена.", icon="warning")
+        CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка: Модель '{selected_model_name}' с провайдером '{selected_provider.__name__}' "
+                                                                  f"не найдена или не поддерживается.", icon="warning")
         Window.unlock_input()
         return
     model, provider = selected_model_info

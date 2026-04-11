@@ -7,6 +7,10 @@
 
 Приложение использует сторонние ИИ‑модели через библиотеку `g4f` и несколько провайдеров (Yqcloud, OpenRouter, DeepInfra, PollinationsAI).
 
+Если вы использовали Win+Shift+S (скриншот экрана) или что-то подобное с Shift, то нужно ещё раз прожать Shift в программе.
+Это делается чтобы списки в настройках/сообщения в чатах можно было листать.
+После активации подобных комбинаций модуль интерфейса думает что Shift ещё зажат и не даёт листать элементы интерфейса.
+
 ---
 
 ## Возможности
@@ -34,9 +38,24 @@
   - Выбор внешнего вида: тёмная, светлая, системная тема.
   - Выбор основной цветовой темы интерфейса.
   - Выбор ИИ‑модели.
+  - Выбор провайдера ИИ-модели
   - Управление автосохранением/автозагрузкой чатов.
   - Включение/отключение иконки в системном трее.
-  - Ввод ключа PAIK (PollinationsAI API key) для некоторых моделей.
+  - Ввод API ключа для некоторых провайдеров
+
+---
+
+## Скриншоты
+
+![image](https://github.com/KiTant/NeuralTeacher_RU/blob/master/images/test_creation.png)
+
+![image](https://github.com/KiTant/NeuralTeacher_RU/blob/master/images/test.png)
+
+![image](https://github.com/KiTant/NeuralTeacher_RU/blob/master/images/test_end.png)
+
+![image](https://github.com/KiTant/NeuralTeacher_RU/blob/master/images/chat.png)
+
+![image](https://github.com/KiTant/NeuralTeacher_RU/blob/master/images/settings.png)
 
 ---
 

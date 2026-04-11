@@ -1,0 +1,26 @@
+{
+  "Yqcloud": [
+    "",
+    "API ключ не требуется"
+  ],
+  "OpenRouter": [
+    "ORK",
+    "Нужен API ключ OpenRouter (необязательно на 12.04.26)"
+  ],
+  "DeepInfra": [
+    "",
+    "Может пригодиться работающий VPN для использования моделей провайдера (для пользователей из РФ)"
+  ],
+  "PollinationsAI": [
+    "PAIK",
+    "Нужен API ключ PollinationsAI"
+  ],
+  "Ollama": [
+    "OllK",
+    "Нужен API ключ Ollama"
+  ],
+  "HuggingFace": [
+    "HFK",
+    "Нужен API ключ HuggingFace"
+  ]
+}
