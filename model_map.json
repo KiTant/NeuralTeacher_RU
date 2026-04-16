@@ -2,14 +2,25 @@
   "GPT-4": {
     "Yqcloud": "gpt-4"
   },
+  "GPT-5.4": {
+    "PollinationsAI": "openai-large"
+  },
   "GPT OSS 120B": {
     "OpenRouter": "openai/gpt-oss-120b:free",
     "Ollama": "gpt-oss:120b-cloud",
     "DeepInfra": "openai/gpt-oss-120b",
     "HuggingFace": "openai/gpt-oss-120b"
   },
+  "Gemma 4 31B": {
+    "OpenRouter": "google/gemma-4-31b-it:free"
+  },
+  "GLM-5.1": {
+    "DeepInfra": "zai-org/GLM-5.1",
+    "PollinationsAI": "glm",
+    "Ollama": "glm-5.1:cloud",
+    "HuggingFace": "zai-org/GLM-5.1",
+  },
   "Step 3.5 Flash": {
-    "OpenRouter": "stepfun/step-3.5-flash:free",
     "DeepInfra": "stepfun-ai/Step-3.5-Flash"
   },
   "MiniMax M2.5": {
@@ -35,7 +46,6 @@
     "Ollama": "kimi-k2.5:cloud"
   },
   "GLM-5": {
-    "PollinationsAI": "glm",
     "HuggingFace": "zai-org/GLM-5",
     "Ollama": "glm-5:cloud",
     "DeepInfra": "zai-org/GLM-5"
