@@ -18,7 +18,7 @@
     "DeepInfra": "zai-org/GLM-5.1",
     "PollinationsAI": "glm",
     "Ollama": "glm-5.1:cloud",
-    "HuggingFace": "zai-org/GLM-5.1",
+    "HuggingFace": "zai-org/GLM-5.1"
   },
   "Step 3.5 Flash": {
     "DeepInfra": "stepfun-ai/Step-3.5-Flash"
