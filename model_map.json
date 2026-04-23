@@ -12,7 +12,10 @@
     "HuggingFace": "openai/gpt-oss-120b"
   },
   "Gemma 4 31B": {
-    "OpenRouter": "google/gemma-4-31b-it:free"
+    "OpenRouter": "google/gemma-4-31b-it:free",
+    "DeepInfra": "google/gemma-4-31B-it",
+    "HuggingFace": "google/gemma-4-31B-it",
+    "Ollama": "gemma4:31b-cloud"
   },
   "GLM-5.1": {
     "DeepInfra": "zai-org/GLM-5.1",
@@ -23,16 +26,16 @@
   "Step 3.5 Flash": {
     "DeepInfra": "stepfun-ai/Step-3.5-Flash"
   },
+  "MiniMax M2.7": {
+    "Ollama": "minimax-m2.7:cloud",
+    "PollinationsAI": "minimax",
+    "HuggingFace": "MiniMaxAI/MiniMax-M2.7"
+  },
   "MiniMax M2.5": {
     "OpenRouter": "minimax/minimax-m2.5:free",
     "HuggingFace": "MiniMaxAI/MiniMax-M2.5",
     "Ollama": "minimax-m2.5:cloud",
     "DeepInfra": "MiniMaxAI/MiniMax-M2.5"
-  },
-  "Nemotron 3 Super": {
-    "OpenRouter": "nvidia/nemotron-3-super-120b-a12b:free",
-    "DeepInfra": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
-    "Ollama": "nemotron-3-super:cloud"
   },
   "Deepseek V3.2": {
     "DeepInfra": "deepseek-ai/DeepSeek-V3.2",
@@ -40,23 +43,35 @@
     "Ollama": "deepseek-v3.2:cloud",
     "HuggingFace": "deepseek-ai/DeepSeek-V3.2"
   },
+  "Kimi K2.6": {
+    "DeepInfra": "moonshotai/Kimi-K2.6",
+    "HuggingFace": "moonshotai/Kimi-K2.6",
+    "Ollama": "kimi-k2.6:cloud",
+    "PollinationsAI": "kimi-k2.6"
+  },
   "Kimi K2.5": {
     "DeepInfra": "moonshotai/Kimi-K2.5",
     "HuggingFace": "moonshotai/Kimi-K2.5",
-    "Ollama": "kimi-k2.5:cloud"
+    "Ollama": "kimi-k2.5:cloud",
+    "PollinationsAI": "kimi"
   },
   "GLM-5": {
     "HuggingFace": "zai-org/GLM-5",
     "Ollama": "glm-5:cloud",
     "DeepInfra": "zai-org/GLM-5"
   },
-  "GPT-5 Nano": {
-    "PollinationsAI": "openai-fast"
-  },
-  "GPT-5 Mini": {
+  "GPT-5.4 Nano": {
     "PollinationsAI": "openai"
   },
   "Gemini 2.5 Flash Lite": {
     "PollinationsAI": "gemini-fast"
+  },
+  "Nemotron 3 Super": {
+    "OpenRouter": "nvidia/nemotron-3-super-120b-a12b:free",
+    "DeepInfra": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
+    "Ollama": "nemotron-3-super:cloud"
+  },
+  "GPT-5 Nano": {
+    "PollinationsAI": "openai-fast"
   }
 }
