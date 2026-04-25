@@ -37,9 +37,13 @@
     "Ollama": "minimax-m2.5:cloud",
     "DeepInfra": "MiniMaxAI/MiniMax-M2.5"
   },
+  "Deepseek V4 Flash": {
+    "DeepInfra": "deepseek-ai/DeepSeek-V4-Flash",
+    "Ollama": "deepseek-v4-flash:cloud",
+    "HuggingFace": "deepseek-ai/DeepSeek-V4-Flash"
+  },
   "Deepseek V3.2": {
     "DeepInfra": "deepseek-ai/DeepSeek-V3.2",
-    "PollinationsAI": "deepseek",
     "Ollama": "deepseek-v3.2:cloud",
     "HuggingFace": "deepseek-ai/DeepSeek-V3.2"
   },
