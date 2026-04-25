@@ -14,19 +14,19 @@ class NavigationFrame(customtkinter.CTkFrame):
                                   ("about", "О программе", "about_image"))
         self.buttons = {}
 
-        for num, info in enumerate(self.buttons_to_create):
-            button = customtkinter.CTkButton(self, corner_radius=20, height=40, border_spacing=10, text=info[1],
+        for num, (key, name, icon_name) in enumerate(self.buttons_to_create):
+            button = customtkinter.CTkButton(self, corner_radius=20, height=40, border_spacing=10, text=name,
                                              fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                             image=getattr(MainWindow, info[2], None), anchor="w",
-                                             command=lambda name=info[0]: MainWindow.select_frame_by_name(name))
-            setattr(self, f"frame_{info[0]}_button", button)
+                                             image=MainWindow.images.get(icon_name, None), anchor="w",
+                                             command=lambda frame_name=key: MainWindow.select_frame_by_name(frame_name))
+            setattr(self, f"frame_{key}_button", button)
             button.grid(row=num+1, column=0, sticky="ew")
-            self.buttons[info[0]] = button
+            self.buttons[key] = button
 
         self.grid(row=0, column=0, sticky="nsew")
         self.grid_rowconfigure(6, weight=1)
 
-        self.navigation_frame_label = customtkinter.CTkLabel(self, text="  НейроУчитель", image=MainWindow.logo_image, compound="left",
+        self.navigation_frame_label = customtkinter.CTkLabel(self, text="  НейроУчитель", image=MainWindow.images["logo_image"], compound="left",
                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
 

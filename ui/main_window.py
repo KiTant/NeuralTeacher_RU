@@ -2,9 +2,11 @@ import customtkinter as ctk
 import pystray
 import threading
 from PIL import Image
-from utils.helpers import resource_path
 from utils.settings_manager import settings_load
-from utils.variables import DEFAULT_SETTINGS, FILES, APPEARANCE_MODES, ICON_PATH, MODEL_MAP, PROVIDER_MAP
+from utils.updater import check_last_version
+from utils.variables import (DEFAULT_SETTINGS, FILES, APPEARANCE_MODES, ICON_PATH, MODEL_MAP,
+                             PROVIDER_MAP, FRAMES, IMAGES, resource_path)
+import sys
 from ui.navigation_frame import NavigationFrame
 from ui.tests_frame import TestsFrame
 from ui.explanation_frame import ExplanationFrame
@@ -13,6 +15,7 @@ from ui.settings_frame import SettingsFrame
 from ui.about_frame import AboutFrame
 
 ctk.set_appearance_mode("Dark")
+current_module = sys.modules[__name__]
 
 
 class MainWindow(ctk.CTk):
@@ -25,16 +28,8 @@ class MainWindow(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        self.logo_image = ctk.CTkImage(Image.open(resource_path('assets/graduation-cap.png')), size=(26, 26))
-        self.image_icon_image = ctk.CTkImage(Image.open(resource_path('assets/file-down.png')), size=(20, 20))
-        self.create_test_image = ctk.CTkImage(Image.open(resource_path('assets/brain-cog.png')), size=(20, 20))
-        self.explanation_chat_image = ctk.CTkImage(Image.open(resource_path('assets/book-open-text.png')), size=(20, 20))
-        self.homework_help_image = ctk.CTkImage(Image.open(resource_path('assets/microscope.png')), size=(20, 20))
-        self.settings_image = ctk.CTkImage(Image.open(resource_path('assets/folder-cog.png')), size=(20, 20))
-        self.about_image = ctk.CTkImage(Image.open(resource_path('assets/app-window.png')), size=(20, 20))
-
+        self.images = IMAGES
         self.updating = False
-
         self.tray_icon = None
 
         self.settings = DEFAULT_SETTINGS.copy()
@@ -47,7 +42,11 @@ class MainWindow(ctk.CTk):
 
         self.protocol("WM_DELETE_WINDOW", self.window_hide)
 
+        self.frames = {}
         self.create_frames()
+
+        if self.settings["auto_update_check"] == "Enabled":
+            check_last_version(self, True)
 
     def create_frames(self):
         if getattr(self, "frames", None):
@@ -57,17 +56,14 @@ class MainWindow(ctk.CTk):
             self.frames = {}
             self.create_frames()
         else:
-            self.navigation_frame = NavigationFrame(self)
-            self.tests_frame = TestsFrame(self)
-            self.homework_frame = HomeworkFrame(self)
-            self.explanation_frame = ExplanationFrame(self)
-            self.settings_frame = SettingsFrame(self)
-            self.about_frame = AboutFrame(self)
-            self.frames = {"navigation": self.navigation_frame, "tests": self.tests_frame, "homework": self.homework_frame,
-                           "explanation": self.explanation_frame, "settings": self.settings_frame, "about": self.about_frame}
+            for key, attr_name, class_name in FRAMES:
+                setattr(self, attr_name, getattr(current_module, class_name)(self))
+                self.frames[key] = getattr(self, attr_name)
 
-    def select_frame_by_name(self, name):
-        for buttonName, button in self.navigation_frame.buttons.items():
+    def select_frame_by_name(self, name, even_if_disabled: bool = False):
+        for buttonName, button in self.frames["navigation"].buttons.items():
+            if name == buttonName and not even_if_disabled and button.cget("state") == "disabled":
+                return
             button.configure(fg_color=("gray75", "gray25") if name == buttonName else "transparent")
         for frameName, frame in self.frames.items():
             if name == frameName:
@@ -83,7 +79,7 @@ class MainWindow(ctk.CTk):
                 break
 
     def set_navigation_toggled(self, enabled: bool):
-        for button in self.navigation_frame.buttons.values():
+        for button in self.frames["navigation"].buttons.values():
             button.configure(state="normal" if enabled else "disabled")
         self.select_frame_by_name("None")
 
@@ -92,11 +88,11 @@ class MainWindow(ctk.CTk):
             self.withdraw()
             self.create_tray_icon()
         else:
-            self.tests_frame._auto_save_cfg()
+            self.frames["tests"]._auto_save_cfg()
             self.destroy()
 
     def quit_app(self):
-        self.tests_frame._auto_save_cfg()
+        self.frames["tests"]._auto_save_cfg()
         if self.tray_icon:
             self.tray_icon.stop()
         self.deiconify()

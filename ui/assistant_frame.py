@@ -3,7 +3,7 @@ import json
 from CTkCodeBoxPlus import CTkCodeBox, MenuSettings, NumberingSettings
 from tkinter import filedialog
 import tkinter
-from utils.variables import DISPLAY_APP_NAME, FILES
+from utils.variables import DISPLAY_APP_NAME, FILES, DEFAULT_CTKCODEBOX_KEYBINDINGS
 import os
 from utils.ai_manager import *
 from utils.helpers import copy_text_to_clipboard
@@ -81,7 +81,8 @@ class AssistantChatFrame(ctk.CTkFrame):
 
         self.message_textbox = CTkCodeBox(self.input_frame, height=80, language="text",
                                           menu_settings=MenuSettings(False), numbering_settings=NumberingSettings(False),
-                                          highlight_current_line=False)
+                                          highlight_current_line=False,
+                                          keybinding_settings=DEFAULT_CTKCODEBOX_KEYBINDINGS)
         self.message_textbox.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         self.message_textbox.bind("<Return>", lambda e: send_message(self, e, system_prompt=self.system_prompt))
         self.message_textbox.bind("<Shift-Return>", lambda event: self.message_textbox.insert("insert", ""))
@@ -110,6 +111,7 @@ class AssistantChatFrame(ctk.CTkFrame):
 
         text_widget = CTkCodeBox(msg_frame, activate_scrollbars=False, language="text", menu_settings=MenuSettings(False),
                                  highlight_current_line=False, numbering_settings=NumberingSettings(False),
+                                 keybinding_settings=DEFAULT_CTKCODEBOX_KEYBINDINGS,
                                  width=min(550, 10 * len(message_text) - 30),
                                  height=min(300, len(message_text)/2.5 + 15))
         text_widget.insert("1.0", message_text)
@@ -172,7 +174,8 @@ class AssistantChatFrame(ctk.CTkFrame):
         edit_window.grid_columnconfigure(0, weight=1)
         edit_window.grid_rowconfigure(0, weight=1)
 
-        edit_textbox = CTkCodeBox(edit_window, language="text", menu_settings=MenuSettings(False))
+        edit_textbox = CTkCodeBox(edit_window, language="text", menu_settings=MenuSettings(False),
+                                  keybinding_settings=DEFAULT_CTKCODEBOX_KEYBINDINGS)
         edit_textbox.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         edit_textbox.insert("1.0", self.message_to_edit["content"])
 
@@ -234,7 +237,7 @@ class AssistantChatFrame(ctk.CTkFrame):
         self.new_chat_button.configure(state="normal" if enabled else "disabled")
         self.delete_chat_button.configure(state="normal" if enabled else "disabled")
         self.clear_chat_button.configure(state="normal" if enabled else "disabled")
-        self.MainWindow.settings_frame.toggle_change_ability(enabled)
+        self.MainWindow.frames["settings"].toggle_change_ability(enabled)
 
     def _clear_chat_display(self):
         for widget in self.chat_display.winfo_children():

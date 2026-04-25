@@ -17,7 +17,7 @@ def settings_change_new_keys(settings, default_values: dict):
             settings[key] = default_values[key]
     for key in list(settings.keys()):
         if key not in default_values:
-            settings[key] = None
+            settings[key] = "None"
     return settings
 
 
@@ -25,7 +25,6 @@ def settings_save(MainWindow: "MainWindowClass", file, attr_name: str = "setting
     os.makedirs(os.path.dirname(file), exist_ok=True)
     with open(file, 'w', encoding='utf-8') as f:
         json.dump(getattr(MainWindow, attr_name), f, indent=4)
-        f.close()
 
 
 def settings_load(MainWindow: "MainWindowClass", file,
@@ -35,7 +34,6 @@ def settings_load(MainWindow: "MainWindowClass", file,
             data = settings_change_new_keys(json.load(f), default_values)
             setattr(MainWindow, attr_name, data)
             settings_apply(MainWindow)
-            f.close()
     else:
         settings_apply(MainWindow)
 

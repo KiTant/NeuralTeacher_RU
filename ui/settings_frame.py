@@ -2,9 +2,10 @@ import customtkinter
 from customtkinter.windows.widgets.theme.theme_manager import ThemeManager
 from typing import TYPE_CHECKING
 from CTkListbox import CTkListbox
-from utils.variables import MAIN_THEMES, MODEL_MAP, DEFAULT_SETTINGS, FILES, MAIN_THEMES_TRANSLATED, PROVIDER_MAP
+from utils.variables import (MAIN_THEMES, MODEL_MAP, DEFAULT_SETTINGS, FILES, MAIN_THEMES_TRANSLATED,
+                             PROVIDER_MAP, resource_path)
 from g4f import Provider
-from utils.helpers import resource_path, entry_keybinds_normalize
+from utils.helpers import entry_keybinds_normalize
 from utils.settings_manager import *
 if TYPE_CHECKING:
     from ui.main_window import MainWindow as MainWindowClass
@@ -81,6 +82,8 @@ class SettingsFrame(customtkinter.CTkFrame):
 
         self.cb_keybinds = customtkinter.CTkCheckBox(self.right_frame, text="Горячие клавиши (скоро)",
                                                      command=lambda: self._on_toggle("keybinds", self.cb_keybinds))
+        self.cb_auto_update = customtkinter.CTkCheckBox(self.right_frame, text="Автопроверка обновлений",
+                                                        command=lambda: self._on_toggle("auto_update_check", self.cb_auto_update))
         self.cb_hw_load = customtkinter.CTkCheckBox(self.right_frame, text="Автозагрузка чатов ДЗ",
                                                     command=lambda: self._on_toggle("auto_homework_load", self.cb_hw_load))
         self.cb_hw_save = customtkinter.CTkCheckBox(self.right_frame, text="Автосохранение чатов ДЗ",
@@ -93,13 +96,15 @@ class SettingsFrame(customtkinter.CTkFrame):
                                                       command=lambda: self._on_toggle("tray_icon", self.cb_tray_icon))
 
         self.cb_keybinds.grid(row=1, column=0, padx=10, pady=4, sticky="w")
-        self.cb_hw_load.grid(row=2, column=0, padx=10, pady=4, sticky="w")
-        self.cb_hw_save.grid(row=3, column=0, padx=10, pady=4, sticky="w")
-        self.cb_expl_load.grid(row=4, column=0, padx=10, pady=4, sticky="w")
-        self.cb_expl_save.grid(row=5, column=0, padx=10, pady=4, sticky="w")
-        self.cb_tray_icon.grid(row=6, column=0, padx=10, pady=4, sticky="w")
+        self.cb_auto_update.grid(row=2, column=0, padx=10, pady=4, sticky="w")
+        self.cb_hw_load.grid(row=3, column=0, padx=10, pady=4, sticky="w")
+        self.cb_hw_save.grid(row=4, column=0, padx=10, pady=4, sticky="w")
+        self.cb_expl_load.grid(row=5, column=0, padx=10, pady=4, sticky="w")
+        self.cb_expl_save.grid(row=6, column=0, padx=10, pady=4, sticky="w")
+        self.cb_tray_icon.grid(row=7, column=0, padx=10, pady=4, sticky="w")
 
         self.setting_ui_elements[self.cb_keybinds] = ("CheckBox", "keybinds")
+        self.setting_ui_elements[self.cb_auto_update] = ("CheckBox", "auto_update_check")
         self.setting_ui_elements[self.cb_hw_load] = ("CheckBox", "auto_homework_load")
         self.setting_ui_elements[self.cb_hw_save] = ("CheckBox", "auto_homework_save")
         self.setting_ui_elements[self.cb_expl_load] = ("CheckBox", "auto_explanation_load")
@@ -113,7 +118,7 @@ class SettingsFrame(customtkinter.CTkFrame):
         self.after(250, self._set_vars)
 
         self.actions_frame = customtkinter.CTkFrame(self.right_frame, fg_color="transparent")
-        self.actions_frame.grid(row=7, column=0, padx=10, pady=(10, 5), sticky="ew")
+        self.actions_frame.grid(row=8, column=0, padx=10, pady=(10, 5), sticky="ew")
         self.actions_frame.grid_columnconfigure((0, 1), weight=1)
 
         self.btn_save_apply = customtkinter.CTkButton(self.actions_frame, text="Сохранить действующие",
@@ -128,12 +133,12 @@ class SettingsFrame(customtkinter.CTkFrame):
                                                         f"Можно получить на сайте провайдера, который легко найти в поисковике по названию. "
                                                         f'В "О программе" есть пример получения API ключа',
                                                    font=customtkinter.CTkFont(size=16, weight="bold"), justify="left", wraplength=500)
-        self.api_key_desc.grid(row=8, column=0, padx=0, pady=5, sticky="w")
+        self.api_key_desc.grid(row=9, column=0, padx=0, pady=5, sticky="w")
 
         self.provider_desc = customtkinter.CTkLabel(self.right_frame,
                                                     text=f"Инфо о выбранном провайдере: ...",
                                                     font=customtkinter.CTkFont(size=16, weight="bold"), justify="left", wraplength=500)
-        self.provider_desc.grid(row=9, column=0, padx=0, pady=5, sticky="w")
+        self.provider_desc.grid(row=10, column=0, padx=0, pady=5, sticky="w")
 
     @staticmethod
     def _set_checkbox_from_setting(checkbox: customtkinter.CTkCheckBox, value: str):
@@ -210,14 +215,14 @@ class SettingsFrame(customtkinter.CTkFrame):
         self.theme_listbox.select(MAIN_THEMES.index(self._get_translated_theme_name(self.MainWindow.settings["main_theme"], False)))
         names = [button.cget("text") for button in self.model_provider_listbox.buttons.values()]
         self.model_provider_listbox.select(names.index(self.MainWindow.settings["provider"]))
-        self.MainWindow.navigation_frame.appearance_mode_menu.set("Тёмная тема" if self.MainWindow.settings['theme'] == "Dark"
+        self.MainWindow.frames["navigation"].appearance_mode_menu.set("Тёмная тема" if self.MainWindow.settings['theme'] == "Dark"
                                       else "Светлая тема" if self.MainWindow.settings['theme'] == "Light" else "Системная тема")
 
     def toggle_change_ability(self, enabled: bool):
         for elem in self.setting_ui_elements.keys():
             elem.configure(state="normal" if enabled else "disabled")
         self.btn_apply_previous.configure(state="normal" if enabled else "disabled")
-        self.MainWindow.navigation_frame.frame_settings_button.configure(state="normal" if enabled else "disabled")
+        self.MainWindow.frames["navigation"].frame_settings_button.configure(state="normal" if enabled else "disabled")
 
     @staticmethod
     def _get_translated_theme_name(key: str, absolute: bool = True):

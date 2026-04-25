@@ -66,6 +66,7 @@
 - **PyStray** — иконка приложения в системном трее;
 - **Pillow (PIL)** — работа с иконками и изображениями;
 - **g4f** — работа с различными ИИ‑провайдерами и моделями;
-- Дополнительные библиотеки: `CTkMessagebox`, `CTkCodeBoxPlus`, `CTkListbox`, `pyperclip`, `webbrowser`, стандартная библиотека Python.
+- Дополнительные библиотеки: `CTkMessagebox`, `CTkCodeBoxPlus`, `CTkListbox`, `pyperclip`, 
+`webbrowser`, `win32com`, `python-docx`, `pdfplumber`, `odfpy`, стандартная библиотека Python.
 
 ---

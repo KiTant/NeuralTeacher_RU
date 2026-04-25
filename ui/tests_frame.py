@@ -1,9 +1,10 @@
 import customtkinter as ctk
 from CTkCodeBoxPlus import CTkCodeBox, MenuSettings, NumberingSettings
 import tkinter as tk
+from CTkMessagebox import CTkMessagebox
 from typing import TYPE_CHECKING
 from utils.ai_manager import request_test_config
-from utils.variables import FILES
+from utils.variables import FILES, DEFAULT_CTKCODEBOX_KEYBINDINGS, DISPLAY_APP_NAME
 import os
 import json
 if TYPE_CHECKING:
@@ -66,7 +67,18 @@ class TestsFrame(ctk.CTkFrame):
         self.expl_required.grid(row=8, column=0, padx=10, pady=(30, 0), sticky="w")
 
         self.send_button = ctk.CTkButton(self.params_frame, text="Отправить запрос", command=self.create_cfg)
-        self.send_button.grid(row=9, column=0, padx=10, pady=(10, 15), sticky="ew")
+        self.send_button.grid(row=9, column=0, padx=10, pady=(10, 5), sticky="ew")
+
+        self.io_frame = ctk.CTkFrame(self.params_frame, fg_color="transparent")
+        self.io_frame.grid(row=10, column=0, padx=10, pady=(0, 15), sticky="ew")
+        self.io_frame.grid_columnconfigure(0, weight=1)
+        self.io_frame.grid_columnconfigure(1, weight=1)
+
+        self.export_button = ctk.CTkButton(self.io_frame, text="Выгрузить в файл", command=self._export_to_file)
+        self.export_button.grid(row=0, column=0, padx=(0, 5), pady=0, sticky="ew")
+
+        self.import_button = ctk.CTkButton(self.io_frame, text="Загрузить из файла", command=self._import_from_file)
+        self.import_button.grid(row=0, column=1, padx=(5, 0), pady=0, sticky="ew")
 
         self.input_frame = ctk.CTkFrame(self)
         self.input_frame.grid(row=0, column=1, padx=(0, 20), pady=20, sticky="nsew")
@@ -93,7 +105,7 @@ class TestsFrame(ctk.CTkFrame):
         self.input_hint.grid(row=2, column=0, padx=10, pady=(0, 5), sticky="w")
         self.topic_textbox = CTkCodeBox(self.input_frame, height=200, language="text",
                                         menu_settings=MenuSettings(False), numbering_settings=NumberingSettings(False),
-                                        highlight_current_line=False)
+                                        highlight_current_line=False, keybinding_settings=DEFAULT_CTKCODEBOX_KEYBINDINGS)
         self.topic_textbox.grid(row=3, column=0, padx=10, pady=(0, 10), sticky="nsew")
         self.topic_textbox.bind("<KeyRelease>", lambda k: self._auto_save_cfg())
 
@@ -120,13 +132,81 @@ class TestsFrame(ctk.CTkFrame):
             request_test_config(self, params)
         return params
 
+    def _export_to_file(self):
+        content = self.topic_textbox.get("1.0", ctk.END).strip()
+        if not content:
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)", message="Текстовое поле пустое — нечего выгружать.", icon="warning")
+            return
+        filepath = ctk.filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Текстовые файлы", "*.txt"), ("Все файлы", "*.*")],
+            title="Сохранить текст в файл"
+        )
+        if filepath and os.path.exists(filepath):
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+    def _import_from_file(self):
+        filepath = ctk.filedialog.askopenfilename(
+            filetypes=[("Текстовые файлы", "*.txt"), ("Word документы", "*.docx *.doc"), ("OpenOffice/LibreOffice документы", "*.odt"),
+                       ("Markdown файлы", "*.md"), ("PDF файлы", "*.pdf"), ("Все файлы", "*.*")],
+            title="Выбрать файл для загрузки"
+        )
+        if not filepath or not os.path.exists(filepath):
+            return
+        ext = os.path.splitext(filepath)[1].lower()
+        try:
+            if ext in [".txt", ".md"]:
+                with open(filepath, "r", encoding='utf-8') as f:
+                    text = f.read()
+            elif ext == ".docx":
+                from docx import Document
+                doc = Document(filepath)
+                text = "\n".join(p.text for p in doc.paragraphs)
+            elif ext == ".pdf":
+                import pdfplumber
+                with pdfplumber.open(filepath) as pdf:
+                    text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+            elif ext == ".odt":
+                from odf import text as odf_text, teletype, opendocument
+                doc = opendocument.load(filepath)
+                text = "\n".join(teletype.extractText(p) for p in doc.getElementsByType(odf_text.P))
+            elif ext == ".doc":  # Только для Windows
+                try:
+                    import win32com.client
+                    word = win32com.client.Dispatch("Word.Application")
+                    word.Visible = False
+                    doc = word.Documents.Open(os.path.abspath(filepath))
+                    text = doc.Content.Text
+                    doc.Close()
+                    word.Quit()
+                except Exception as e:
+                    CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)",
+                                  message=f"Ошибка чтения .doc (требуется MS Word): {e}",
+                                  icon="warning")
+                    return
+            else:
+                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)",
+                              message=f"Формат '{ext}' не поддерживается.\n"
+                                      f"Поддерживаются: .doc, .docx, .pdf, .odt, .txt, .md",
+                              icon="warning")
+                return
+            if text.strip():
+                self.topic_textbox.delete("1.0", ctk.END)
+                self.topic_textbox.insert("1.0", text.strip())
+                self._auto_save_cfg()
+            else:
+                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)", message="Файл не содержит текста.", icon="warning")
+        except Exception as e:
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)", message=f"Не удалось прочитать файл:\n{e}", icon="cancel")
+
     def lock_input(self, text):
         self.send_button.configure(state="disabled", text=text)
-        self.MainWindow.settings_frame.toggle_change_ability(False)
+        self.MainWindow.frames["settings_frame"].toggle_change_ability(False)
 
     def unlock_input(self):
         self.send_button.configure(state="normal", text="Сформировать запрос")
-        self.MainWindow.settings_frame.toggle_change_ability(True)
+        self.MainWindow.frames["settings_frame"].toggle_change_ability(True)
 
     def _auto_load_cfg(self):
         path = FILES.get(f"last_test_file")

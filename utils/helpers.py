@@ -1,12 +1,10 @@
-import os
 import webbrowser
 import json
 from CTkMessagebox import CTkMessagebox
 from CTkCodeBoxPlus import register_keybind as register_keybind
 from g4f import Provider
-from utils.variables import MODEL_MAP, PROVIDER_MAP, DEFAULT_SETTINGS, ORPK
+from utils.variables import MODEL_MAP, PROVIDER_MAP, DEFAULT_SETTINGS, ORPK, DISPLAY_APP_NAME
 import customtkinter as ctk
-from utils.variables import DISPLAY_APP_NAME
 import pyperclip
 from typing import Union, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -37,11 +35,6 @@ def copy_text_to_clipboard(text_to_copy):
             pyperclip.copy(text_to_copy)
         except:
             pass
-
-
-def resource_path(file):
-    data_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-    return os.path.join(data_dir, file)
 
 
 def open_link(link: str):

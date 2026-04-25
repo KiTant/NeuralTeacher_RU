@@ -1,8 +1,7 @@
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 from typing import TYPE_CHECKING, Any, Dict, List
-from utils.helpers import resource_path
-from utils.variables import ICON_PATH
+from utils.variables import ICON_PATH, resource_path
 import random
 if TYPE_CHECKING:
     from ui.main_window import MainWindow as MainWindowClass
@@ -63,7 +62,7 @@ class InTestWindow(ctk.CTkToplevel):
 
     def _unblock_main_window(self):
         self.MainWindow.set_navigation_toggled(True)
-        self.MainWindow.tests_frame.unlock_input()
+        self.MainWindow.frames["tests"].unlock_input()
 
     def _build_header(self):
         for w in self.header_frame.winfo_children():
