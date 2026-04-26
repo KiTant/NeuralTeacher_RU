@@ -10,7 +10,7 @@ APP_NAME = "NeuralTeacher"
 DISPLAY_APP_NAME = "НейроУчитель"
 REPO_NAME = APP_NAME + "_RU"
 ICON_PATH = 'assets/graduation-cap.ico'
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 IS_WIN7 = False  # При запуске проекта на Windows 7 нужно поставить на True
 DEFAULT_CTKCODEBOX_KEYBINDINGS = KeybindingSettings(B__on_backtick="") if IS_WIN7 else KeybindingSettings()
 

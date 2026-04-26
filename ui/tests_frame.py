@@ -202,11 +202,11 @@ class TestsFrame(ctk.CTkFrame):
 
     def lock_input(self, text):
         self.send_button.configure(state="disabled", text=text)
-        self.MainWindow.frames["settings_frame"].toggle_change_ability(False)
+        self.MainWindow.frames["settings"].toggle_change_ability(False)
 
     def unlock_input(self):
         self.send_button.configure(state="normal", text="Сформировать запрос")
-        self.MainWindow.frames["settings_frame"].toggle_change_ability(True)
+        self.MainWindow.frames["settings"].toggle_change_ability(True)
 
     def _auto_load_cfg(self):
         path = FILES.get(f"last_test_file")
