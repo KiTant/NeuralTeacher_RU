@@ -40,7 +40,7 @@ def copy_text_to_clipboard(text_to_copy):
 def open_link(link: str):
     try:
         webbrowser.open(link)
-    except:
+    except Exception:
         CTkMessagebox(title=f"{DISPLAY_APP_NAME} (открытие ссылки)",
                       message=f"Неизвестная ошибка при попытке открыть ссылку: {link}",
                       icon="cancel")
@@ -51,8 +51,7 @@ def parse_json_safely(text: str):
         return json.loads(text)
     except Exception:
         pass
-    start = text.find('{')
-    end = text.rfind('}')
+    start, end = text.find('{'), text.rfind('}')
     if start != -1 and end != -1 and end > start:
         candidate = text[start:end + 1]
         try:
@@ -68,22 +67,22 @@ def entry_paste(entry: ctk.CTkEntry):
             entry.delete(ctk.SEL_FIRST, ctk.SEL_LAST)
         finally:
             entry.insert(ctk.INSERT, pyperclip.paste())
-    except:
+    except Exception:
         return
 
 
 def entry_copy(entry: ctk.CTkEntry):
     try:
         pyperclip.copy(entry.get()[entry.index(ctk.SEL_FIRST):entry.index(ctk.SEL_LAST)])
-    except:
+    except Exception:
         return
 
 
 def entry_cut(entry: ctk.CTkEntry):
+    entry_copy(entry)
     try:
-        entry_copy(entry)
         entry.delete(ctk.SEL_FIRST, ctk.SEL_LAST)
-    except:
+    except Exception:
         return
 
 

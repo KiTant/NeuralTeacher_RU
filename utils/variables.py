@@ -5,12 +5,13 @@ import os
 import requests
 from PIL import Image
 import customtkinter as ctk
+from filelogr import Logger
 
 APP_NAME = "NeuralTeacher"
 DISPLAY_APP_NAME = "НейроУчитель"
 REPO_NAME = APP_NAME + "_RU"
 ICON_PATH = 'assets/graduation-cap.ico'
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 IS_WIN7 = False  # При запуске проекта на Windows 7 нужно поставить на True
 DEFAULT_CTKCODEBOX_KEYBINDINGS = KeybindingSettings(B__on_backtick="") if IS_WIN7 else KeybindingSettings()
 
@@ -78,6 +79,7 @@ DEFAULT_SETTINGS = {
     "auto_explanation_load": "Enabled",
     "auto_explanation_save": "Enabled",
     "auto_update_check": "Enabled",
+    "logging": "Enabled",
     "ai_model": "GPT-4",
     "provider": "Yqcloud",
     "tray_icon": "Enabled",
@@ -104,8 +106,8 @@ def get_provider_map():
         url = f"https://raw.githubusercontent.com/{find_current_username()}/{REPO_NAME}/refs/heads/master/provider_map.json"
         response = requests.get(url, timeout=5)
         if response.ok:
-            convert(response)
-    except:
+            return convert(response)
+    except Exception:
         pass
     with open(FILES["provider_map"], "r", encoding='utf-8') as f:
         return convert(json.load(f), True)
@@ -133,10 +135,14 @@ def get_model_map():
         response = requests.get(url, timeout=5)
         if response.ok:
             return convert(response)
-    except:
+    except Exception:
         pass
     with open(FILES["model_map"], 'r', encoding='utf-8') as f:
         return convert(json.load(f), True)
 
 MODEL_MAP = get_model_map()
 PROVIDER_MAP = get_provider_map()
+
+Logger.configure(data_dir=APPDATA + "/" + APP_NAME,
+                 log_file=f"NeuralTeacher.log", no_console=True)
+Logger.clear_log()

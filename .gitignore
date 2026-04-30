@@ -4,4 +4,4 @@ __pycache__/
 .pytest_cache/
 .idea/
 output/
-test*.py
+test_convert_for_json.py

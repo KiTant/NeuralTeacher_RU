@@ -1,5 +1,6 @@
 import customtkinter
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
+from utils.variables import Logger
 if TYPE_CHECKING:
     from ui.main_window import MainWindow as MainWindowClass
 
@@ -13,8 +14,9 @@ class NavigationFrame(customtkinter.CTkFrame):
                                   ("homework", "Помощь с ДЗ", "homework_help_image"), ("settings", "Настройки", "settings_image"),
                                   ("about", "О программе", "about_image"))
         self.buttons = {}
-
+        if self.MainWindow.settings["logging"] == "Enabled": Logger.log_action("Создание кнопок в навигации...")
         for num, (key, name, icon_name) in enumerate(self.buttons_to_create):
+            if self.MainWindow.settings["logging"] == "Enabled": Logger.log_action(f"Создание кнопки {num}: {key}, {name}, {icon_name}...")
             button = customtkinter.CTkButton(self, corner_radius=20, height=40, border_spacing=10, text=name,
                                              fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                              image=MainWindow.images.get(icon_name, None), anchor="w",
@@ -22,6 +24,7 @@ class NavigationFrame(customtkinter.CTkFrame):
             setattr(self, f"frame_{key}_button", button)
             button.grid(row=num+1, column=0, sticky="ew")
             self.buttons[key] = button
+        if self.MainWindow.settings["logging"] == "Enabled": Logger.log_info("Кнопки в навигации созданы")
 
         self.grid(row=0, column=0, sticky="nsew")
         self.grid_rowconfigure(6, weight=1)

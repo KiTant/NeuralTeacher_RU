@@ -5,7 +5,7 @@ from PIL import Image
 from utils.settings_manager import settings_load
 from utils.updater import check_last_version
 from utils.variables import (DEFAULT_SETTINGS, FILES, APPEARANCE_MODES, ICON_PATH, MODEL_MAP,
-                             PROVIDER_MAP, FRAMES, IMAGES, resource_path)
+                             PROVIDER_MAP, FRAMES, IMAGES, resource_path, Logger)
 import sys
 from ui.navigation_frame import NavigationFrame
 from ui.tests_frame import TestsFrame
@@ -39,10 +39,13 @@ class MainWindow(ctk.CTk):
             self.settings["ai_model"] = DEFAULT_SETTINGS["ai_model"]
         if self.settings["provider"] not in PROVIDER_MAP:
             self.settings["provider"] = DEFAULT_SETTINGS["provider"]
+        if self.settings["logging"] != "Enabled":
+            Logger.clear_log()
 
         self.protocol("WM_DELETE_WINDOW", self.window_hide)
 
         self.frames = {}
+        if self.settings["logging"] == "Enabled": Logger.log_action("Создание фреймов...")
         self.create_frames()
 
         if self.settings["auto_update_check"] == "Enabled":
@@ -50,6 +53,7 @@ class MainWindow(ctk.CTk):
 
     def create_frames(self):
         if getattr(self, "frames", None):
+            if self.settings["logging"] == "Enabled": Logger.log_action("Пересоздание фреймов...")
             for frame in self.frames.values():
                 frame.grid_forget()
                 frame.after(500, frame.destroy)
@@ -57,8 +61,11 @@ class MainWindow(ctk.CTk):
             self.create_frames()
         else:
             for key, attr_name, class_name in FRAMES:
+                if self.settings["logging"] == "Enabled": Logger.log_action(f"Создание фрейма {key}, "
+                                                                            f"{attr_name}, {class_name}...")
                 setattr(self, attr_name, getattr(current_module, class_name)(self))
                 self.frames[key] = getattr(self, attr_name)
+            if self.settings["logging"] == "Enabled": Logger.log_action("Фреймы созданы")
 
     def select_frame_by_name(self, name, even_if_disabled: bool = False):
         for buttonName, button in self.frames["navigation"].buttons.items():

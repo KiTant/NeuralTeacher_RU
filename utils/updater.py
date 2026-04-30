@@ -1,7 +1,7 @@
 from CTkMessagebox import CTkMessagebox
 import requests
 import threading
-from utils.variables import VERSION, APP_NAME, DISPLAY_APP_NAME, REPO_NAME, IS_WIN7
+from utils.variables import VERSION, APP_NAME, DISPLAY_APP_NAME, REPO_NAME, IS_WIN7, Logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ui.main_window import MainWindow as MainWindowClass
@@ -49,14 +49,21 @@ def _download_last_release_thread(MainWindow: "MainWindowClass", msg, version: s
                             message="Новое обновление успешно загружено как новый файл"
                                     " в той же директории (папке), где находится ЭТА версия программы."
                                     "Вы можете удалить эту версию и открыть новую.")))
-        except:
+        except PermissionError as e:
+            if MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка прав при создании файла (обновление): {e}")
             MainWindow.after(0, lambda: (msg.destroy(),
                 _stop_update(MainWindow, title=f"{DISPLAY_APP_NAME} (загрузка обновления)", icon="cancel",
-                            message="Неизвестная ошибка при попытке создать новый файл с обновлённой версией программы.")))
+                             message="Ошибка прав при попытке создать новый файл с обновлённой версией программы.")))
+        except Exception as e:
+            if MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Неизвестная ошибка при создании файла (обновление): {e}")
+            MainWindow.after(0, lambda: (msg.destroy(),
+                _stop_update(MainWindow, title=f"{DISPLAY_APP_NAME} (загрузка обновления)", icon="cancel",
+                             message="Неизвестная ошибка при попытке создать новый файл с обновлённой версией программы.")))
     else:
+        if MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка при попытке получить файл новейшей версии: {response}")
         MainWindow.after(0, lambda: (msg.destroy(),
             _stop_update(MainWindow, title=f"{DISPLAY_APP_NAME} (загрузка обновления)", icon="cancel",
-                        message="Неизвестная ошибка при попытке получить новейшую версию. Пожалуйста, проверьте свой интернет.")))
+                         message="Неизвестная ошибка при попытке получить новейшую версию. проверьте своё подключение к интернету.")))
 
 
 def check_last_version(MainWindow: "MainWindowClass", autocheck: bool = False):
@@ -108,6 +115,7 @@ def _handle_check_response(MainWindow: "MainWindowClass", msg, response, autoche
             _stop_update(MainWindow, title=f"{DISPLAY_APP_NAME} (проверка обновлений)", icon="info",
                         message=f"У вас самая новейшая версия {DISPLAY_APP_NAME}", autocheck=autocheck)
     else:
+        if MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка при попытке получить инфо о новейшей версии: {response}")
         _stop_update(MainWindow, title=f"{DISPLAY_APP_NAME} (проверка обновлений)", icon="cancel",
-                    message="Неизвестная ошибка при попытке получить информацию о новейшей версии. Пожалуйста, проверьте свой интернет.",
+                     message="Неизвестная ошибка при попытке получить информацию о новейшей версии. Пожалуйста, проверьте своё подключение к интернету.",
                      autocheck=autocheck)

@@ -61,12 +61,12 @@
 
 ## Технологии
 
-- **Python 3.9+** (рекомендуется актуальная версия Python 3);
+- **Python 3.8+** (рекомендуется актуальная версия Python 3);
 - **CustomTkinter** — современный UI‑фреймворк для Tkinter;
 - **PyStray** — иконка приложения в системном трее;
 - **Pillow (PIL)** — работа с иконками и изображениями;
 - **g4f** — работа с различными ИИ‑провайдерами и моделями;
 - Дополнительные библиотеки: `CTkMessagebox`, `CTkCodeBoxPlus`, `CTkListbox`, `pyperclip`, 
-`webbrowser`, `win32com`, `python-docx`, `pdfplumber`, `odfpy`, стандартная библиотека Python.
+`webbrowser`, `win32com`, `python-docx`, `pdfplumber`, `odfpy`, `filelogr`, стандартная библиотека Python.
 
 ---

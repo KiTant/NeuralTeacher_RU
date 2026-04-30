@@ -1,9 +1,8 @@
 import customtkinter as ctk
 import json
 from CTkCodeBoxPlus import CTkCodeBox, MenuSettings, NumberingSettings
-from tkinter import filedialog
 import tkinter
-from utils.variables import DISPLAY_APP_NAME, FILES, DEFAULT_CTKCODEBOX_KEYBINDINGS
+from utils.variables import DISPLAY_APP_NAME, FILES, DEFAULT_CTKCODEBOX_KEYBINDINGS, Logger
 import os
 from utils.ai_manager import *
 from utils.helpers import copy_text_to_clipboard
@@ -211,6 +210,7 @@ class AssistantChatFrame(ctk.CTkFrame):
         except ValueError:
             CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)", message=f"Ошибка при удалении: Сообщение не найдено в истории", icon="warning")
         except Exception as e:
+            if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка при попытке удалить сообщение: {e}")
             CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)", message=f"Ошибка при удалении: {e}", icon="cancel")
 
     def display_ai_response(self, ai_response_data):
@@ -285,21 +285,22 @@ class AssistantChatFrame(ctk.CTkFrame):
         if self.export_button.cget("state") == "disabled":
             CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)", message="Экспорт невозможен во время генерации ответа.", icon="warning")
             return
-        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json"), ("All files", "*.*")],
-                                                 title="Сохранить чаты как...")
+        file_path = ctk.filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json"), ("All files", "*.*")],
+                                                     title="Сохранить чаты как...")
         if file_path:
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     json.dump(self.chats, f, ensure_ascii=False, indent=4)
                 CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)", message=f"Чаты успешно экспортированы в {file_path}", icon="check")
             except Exception as e:
+                if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка экспорта чата с ИИ: {e}")
                 CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)", message=f"Ошибка экспорта: {e}", icon="cancel")
 
     def import_chats(self):
         if self.import_button.cget("state") == "disabled":
             CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)", message="Импорт невозможен во время генерации ответа.", icon="warning")
             return
-        file_path = filedialog.askopenfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json"), ("All files", "*.*")],
+        file_path = ctk.filedialog.askopenfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json"), ("All files", "*.*")],
                                                title="Выберите файл для импорта...")
         if file_path:
             try:
@@ -327,6 +328,7 @@ class AssistantChatFrame(ctk.CTkFrame):
                               message=f"Чаты успешно импортированы из {file_path}", icon="check")
                 self._auto_save_chats()
             except Exception as e:
+                if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка импорта чата с ИИ: {e}")
                 CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)",
                               message=f"Ошибка импорта: {e}", icon="cancel")
 
@@ -363,6 +365,7 @@ class AssistantChatFrame(ctk.CTkFrame):
                 self.redraw_chat()
                 self._auto_save_chats()
             except Exception as e:
+                if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка удаления чата: {e}")
                 CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)", message=f"Ошибка удаления чата: {e}", icon="cancel")
 
     def _auto_load_chats(self):

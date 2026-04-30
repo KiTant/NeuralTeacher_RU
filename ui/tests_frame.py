@@ -4,7 +4,7 @@ import tkinter as tk
 from CTkMessagebox import CTkMessagebox
 from typing import TYPE_CHECKING
 from utils.ai_manager import request_test_config
-from utils.variables import FILES, DEFAULT_CTKCODEBOX_KEYBINDINGS, DISPLAY_APP_NAME
+from utils.variables import FILES, DEFAULT_CTKCODEBOX_KEYBINDINGS, DISPLAY_APP_NAME, Logger
 import os
 import json
 if TYPE_CHECKING:
@@ -135,16 +135,23 @@ class TestsFrame(ctk.CTkFrame):
     def _export_to_file(self):
         content = self.topic_textbox.get("1.0", ctk.END).strip()
         if not content:
-            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)", message="Текстовое поле пустое — нечего выгружать.", icon="warning")
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (экспорт текста)", message="Текстовое поле пустое — нечего выгружать.", icon="warning")
             return
         filepath = ctk.filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Текстовые файлы", "*.txt"), ("Все файлы", "*.*")],
             title="Сохранить текст в файл"
         )
-        if filepath and os.path.exists(filepath):
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write(content)
+        try:
+            if filepath:
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(content)
+        except PermissionError as e:
+            if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Не удалось записать файл для экспорта из теста (Permission): {e}")
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (экспорт текста)", message=f"Ошибка прав: {e}", icon="warning")
+        except Exception as e:
+            if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Не удалось записать файл для экспорта из теста: {e}")
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (экспорт текста)", message=f"Неизвестная ошибка: {e}", icon="warning")
 
     def _import_from_file(self):
         filepath = ctk.filedialog.askopenfilename(
@@ -157,8 +164,16 @@ class TestsFrame(ctk.CTkFrame):
         ext = os.path.splitext(filepath)[1].lower()
         try:
             if ext in [".txt", ".md"]:
-                with open(filepath, "r", encoding='utf-8') as f:
-                    text = f.read()
+                try:
+                    with open(filepath, "r", encoding='utf-8') as f:
+                        text = f.read()
+                except UnicodeDecodeError:
+                    try:
+                        with open(filepath, "r", encoding='cp1251') as f:
+                            text = f.read()
+                    except UnicodeDecodeError:
+                        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                            text = f.read()
             elif ext == ".docx":
                 from docx import Document
                 doc = Document(filepath)
@@ -181,12 +196,12 @@ class TestsFrame(ctk.CTkFrame):
                     doc.Close()
                     word.Quit()
                 except Exception as e:
-                    CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)",
+                    CTkMessagebox(title=f"{DISPLAY_APP_NAME} (импорт текста)",
                                   message=f"Ошибка чтения .doc (требуется MS Word): {e}",
                                   icon="warning")
                     return
             else:
-                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)",
+                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (импорт текста)",
                               message=f"Формат '{ext}' не поддерживается.\n"
                                       f"Поддерживаются: .doc, .docx, .pdf, .odt, .txt, .md",
                               icon="warning")
@@ -196,9 +211,10 @@ class TestsFrame(ctk.CTkFrame):
                 self.topic_textbox.insert("1.0", text.strip())
                 self._auto_save_cfg()
             else:
-                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)", message="Файл не содержит текста.", icon="warning")
+                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (импорт текста)", message="Файл не содержит текста.", icon="warning")
         except Exception as e:
-            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (ошибка)", message=f"Не удалось прочитать файл:\n{e}", icon="cancel")
+            if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Не удалось прочитать файл для импорта в тест: {e}")
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (импорт текста)", message=f"Не удалось прочитать файл: {e}", icon="cancel")
 
     def lock_input(self, text):
         self.send_button.configure(state="disabled", text=text)

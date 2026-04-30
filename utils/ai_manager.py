@@ -1,6 +1,6 @@
 from CTkMessagebox import CTkMessagebox
 from g4f import ChatCompletion, Provider
-from utils.variables import APP_NAME, DISPLAY_APP_NAME
+from utils.variables import APP_NAME, DISPLAY_APP_NAME, Logger
 from utils.helpers import parse_json_safely, get_selected_model_info, get_api_key
 import customtkinter as ctk
 import threading
@@ -51,6 +51,7 @@ def get_ai_response(Window: "AssistantChatFrame", conversation_history, model, p
         ai_response_data = {"role": "assistant", "content": ai_response, "is_edited": False,
                             "type": "text", "model_name": model_name}
     except Exception as e:
+        if Window.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка при получении ответа от ИИ: {e}; {model}; {provider}")
         ai_response_data = {"role": APP_NAME,
                             "content": f"Ошибка при попытке получить ответ от ИИ:"
                                        f" {e}\nПопробуйте выбрать другую модель. "
@@ -60,6 +61,7 @@ def get_ai_response(Window: "AssistantChatFrame", conversation_history, model, p
 
 
 def regenerate_ai_response(Window: "AssistantChatFrame", ai_message_data, system_prompt: str = None):
+    selected_model, selected_provider = None, None
     try:
         ai_index = Window.message_history.index(ai_message_data)
         if ai_index > 0 and Window.message_history[ai_index - 1]["role"] == "user":
@@ -95,6 +97,7 @@ def regenerate_ai_response(Window: "AssistantChatFrame", ai_message_data, system
                       message=f"Ошибка в процессе перегенерирования ответа: Сообщение от ИИ не найдено в истории",
                       icon="warning")
     except Exception as e:
+        if Window.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка перегенерирования ответа: {e}; {selected_model}; {selected_provider}")
         CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Чат с ИИ)",
                       message=f"Ошибка в процессе перегенерирования ответа: {e}", icon="cancel")
 
@@ -123,7 +126,7 @@ def request_test_config(Window, request_dict: dict, on_config=None):
         f"Тем(а,ы)/Материал по которым должен быть тест: {input_text}; "
         f"НУЖНО ЛИ использовать вопросы с множественным выбором в конфиге: {'ДА' if allow_mc else 'НЕТ'}; "
         f"НУЖНО ЛИ использовать вопросы с письменным вводом в конфиге: {'ДА' if allow_entry else 'НЕТ'}; "
-        f"НУЖНО ЛИ добавлять объяснения к ответам: {'ДА' if expl_required else 'НЕТ'}"
+        f"НУЖНО ЛИ добавлять объяснения к ответам: {'ДА' if expl_required else 'НЕТ'}; "
         "ШАБЛОН КОНФИГА: " + config_template + "\n\n"
         "Требования к конфигу: "
         "- Ровно один валидный объект JSON без пояснений и без markdown. "
@@ -170,12 +173,15 @@ def request_test_config(Window, request_dict: dict, on_config=None):
                         from ui.in_test_window import InTestWindow
                         test_w = InTestWindow(Window.MainWindow, config)
                     except Exception as e:
+                        if Window.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка открытия окна теста: "
+                                                                                                f"{e}; {model}; {provider}\nКонфиг:{config}")
                         Window.unlock_input()
                         test_w.destroy()
                         CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка открытия окна теста: {e}", icon="cancel")
 
             handle()
         except Exception as e:
+            if Window.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка генерации конфига теста: {e}; {model}; {provider};")
             Window.unlock_input()
             CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка генерации конфига: {e}", icon="cancel")
 
