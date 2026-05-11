@@ -11,8 +11,8 @@ class NavigationFrame(customtkinter.CTkFrame):
         self.MainWindow = MainWindow
 
         self.buttons_to_create = (("tests", "Создание теста", "create_test_image"), ("explanation", "Объяснение\nтемы / понятий", "explanation_chat_image"),
-                                  ("homework", "Помощь с ДЗ", "homework_help_image"), ("settings", "Настройки", "settings_image"),
-                                  ("about", "О программе", "about_image"))
+                                  ("homework", "Помощь с ДЗ", "homework_help_image"), ("website", "Теория и\nинструменты (Бета)", "folder_search_image"),
+                                  ("settings", "Настройки", "settings_image"), ("about", "О программе", "about_image"))
         self.buttons = {}
         if self.MainWindow.settings["logging"] == "Enabled": Logger.log_action("Создание кнопок в навигации...")
         for num, (key, name, icon_name) in enumerate(self.buttons_to_create):
@@ -27,7 +27,7 @@ class NavigationFrame(customtkinter.CTkFrame):
         if self.MainWindow.settings["logging"] == "Enabled": Logger.log_info("Кнопки в навигации созданы")
 
         self.grid(row=0, column=0, sticky="nsew")
-        self.grid_rowconfigure(6, weight=1)
+        self.grid_rowconfigure(len(self.buttons_to_create)+1, weight=1)
 
         self.navigation_frame_label = customtkinter.CTkLabel(self, text="  НейроУчитель", image=MainWindow.images["logo_image"], compound="left",
                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
@@ -35,4 +35,4 @@ class NavigationFrame(customtkinter.CTkFrame):
 
         self.appearance_mode_menu = customtkinter.CTkOptionMenu(self, values=["Тёмная тема", "Светлая тема", "Системная тема"],
                                                                 command=MainWindow.change_appearance_mode_event)
-        self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
+        self.appearance_mode_menu.grid(row=len(self.buttons_to_create)+1, column=0, padx=20, pady=20, sticky="s")

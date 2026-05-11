@@ -5,3 +5,7 @@ __pycache__/
 .idea/
 output/
 test_convert_for_json.py
+tailwindcss-windows-x64.exe
+tailwind.config.js
+tailwind_compilate.bat
+website/css/input.css

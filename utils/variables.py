@@ -11,7 +11,7 @@ APP_NAME = "NeuralTeacher"
 DISPLAY_APP_NAME = "НейроУчитель"
 REPO_NAME = APP_NAME + "_RU"
 ICON_PATH = 'assets/graduation-cap.ico'
-VERSION = "1.2.2"
+VERSION = "1.3.0"
 IS_WIN7 = False  # При запуске проекта на Windows 7 нужно поставить на True
 DEFAULT_CTKCODEBOX_KEYBINDINGS = KeybindingSettings(B__on_backtick="") if IS_WIN7 else KeybindingSettings()
 
@@ -28,7 +28,8 @@ ORPK = ("".join(ORPK))[::-1]  # Этот ключ был создан специ
 
 FRAMES = (("navigation", "navigation_frame", "NavigationFrame"), ("tests", "tests_frame", "TestsFrame"),
           ("homework", "homework_frame", "HomeworkFrame"), ("explanation", "explanation_frame", "ExplanationFrame"),
-          ("settings", "settings_frame", "SettingsFrame"), ("about", "about_frame", "AboutFrame"))
+          ("settings", "settings_frame", "SettingsFrame"), ("about", "about_frame", "AboutFrame"),
+          ("website", "website_frame", "WebsiteFrame"))  # (ключ, имя атрибута, класс)
 
 APPDATA = os.getenv('APPDATA')
 FILES = {
@@ -43,7 +44,7 @@ FILES = {
 IMAGES_INFO = (("logo_image", "assets/graduation-cap.png", (26, 26)), ("file_icon_image", "assets/file-down.png", (20, 20)),
                ("create_test_image", "assets/brain-cog.png", (20, 20)), ("explanation_chat_image", "assets/book-open-text.png", (20, 20)),
                ("homework_help_image", "assets/microscope.png", (20, 20)), ("settings_image", "assets/folder-cog.png", (20, 20)),
-               ("about_image", "assets/app-window.png", (20, 20)))
+               ("about_image", "assets/app-window.png", (20, 20)), ("folder_search_image", "assets/folder-search.png", (20, 20)))  # (название, путь, размер в пикселях)
 IMAGES = {}
 for image_name, path, size in IMAGES_INFO:
     IMAGES[image_name] = ctk.CTkImage(Image.open(resource_path(path)), size=size)

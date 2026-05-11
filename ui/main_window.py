@@ -13,6 +13,7 @@ from ui.explanation_frame import ExplanationFrame
 from ui.homework_frame import HomeworkFrame
 from ui.settings_frame import SettingsFrame
 from ui.about_frame import AboutFrame
+from ui.website_frame import WebsiteFrame
 
 ctk.set_appearance_mode("Dark")
 current_module = sys.modules[__name__]
@@ -65,7 +66,7 @@ class MainWindow(ctk.CTk):
                                                                             f"{attr_name}, {class_name}...")
                 setattr(self, attr_name, getattr(current_module, class_name)(self))
                 self.frames[key] = getattr(self, attr_name)
-            if self.settings["logging"] == "Enabled": Logger.log_action("Фреймы созданы")
+            if self.settings["logging"] == "Enabled": Logger.log_info("Фреймы созданы")
 
     def select_frame_by_name(self, name, even_if_disabled: bool = False):
         for buttonName, button in self.frames["navigation"].buttons.items():
@@ -75,6 +76,7 @@ class MainWindow(ctk.CTk):
         for frameName, frame in self.frames.items():
             if name == frameName:
                 frame.grid(row=0, column=1, sticky="nsew")
+                if frameName == "website": frame.start()
             elif frameName != "navigation":
                 frame.grid_forget()
 

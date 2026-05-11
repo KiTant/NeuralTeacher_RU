@@ -1,8 +1,12 @@
+import multiprocessing
+import clr
 import customtkinter as ctk
 from ui.main_window import MainWindow
 from utils.variables import DEFAULT_SETTINGS, resource_path, IS_WIN7
 import g4f
 from utils.variables import Logger
+
+multiprocessing.freeze_support()
 
 g4f.debug.version_check = False
 if IS_WIN7:
