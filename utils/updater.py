@@ -32,9 +32,17 @@ def _download_last_release(MainWindow: "MainWindowClass", version: str, asset_na
     threading.Thread(target=_download_last_release_thread, args=(MainWindow, msg, version, asset_name), daemon=True).start()
 
 
+def _get_proxies(MainWindow: "MainWindowClass"):
+    proxy = MainWindow.settings.get("proxy", "").strip()
+    if proxy:
+        return {"http": proxy, "https": proxy}
+    return None
+
+
 def _download_last_release_thread(MainWindow: "MainWindowClass", msg, version: str, asset_name: str):
     try:
-        response = requests.get(f'https://github.com/{find_current_username()}/{REPO_NAME}/releases/download/{version}/{asset_name}')
+        response = requests.get(f'https://github.com/{find_current_username()}/{REPO_NAME}/releases/download/{version}/{asset_name}',
+                                proxies=_get_proxies(MainWindow))
     except requests.exceptions.ConnectionError:
         MainWindow.after(0, lambda: (msg.destroy(),
             _stop_update(MainWindow, title=f"{DISPLAY_APP_NAME} (загрузка обновления)", icon="cancel",
@@ -78,7 +86,8 @@ def check_last_version(MainWindow: "MainWindowClass", autocheck: bool = False):
 
 def _check_last_version_thread(MainWindow: "MainWindowClass", msg, autocheck):
     try:
-        response = requests.get(f"https://api.github.com/repos/{find_current_username()}/{REPO_NAME}/releases/latest")
+        response = requests.get(f"https://api.github.com/repos/{find_current_username()}/{REPO_NAME}/releases/latest",
+                                proxies=_get_proxies(MainWindow))
     except requests.exceptions.ConnectionError:
         MainWindow.after(0, lambda: ((msg.destroy() if not autocheck else None),
             _stop_update(MainWindow, title=f"{DISPLAY_APP_NAME} (проверка обновлений)",

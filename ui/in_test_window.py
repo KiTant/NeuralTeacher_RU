@@ -1,8 +1,12 @@
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 from typing import TYPE_CHECKING, Any, Dict, List
-from utils.variables import ICON_PATH, resource_path
+from utils.variables import ICON_PATH, resource_path, Logger, DISPLAY_APP_NAME
 import random
+import webbrowser
+import tempfile
+import os
+import html as htmlL
 if TYPE_CHECKING:
     from ui.main_window import MainWindow as MainWindowClass
 
@@ -28,7 +32,7 @@ class InTestWindow(ctk.CTkToplevel):
         if not isinstance(qs, list):
             qs = []
         self.shuffle: bool = self.config_data.get("shuffle", True)
-        self._base_questions: List[Dict[str, Any]] = qs.copy()
+        self._base_questions: List[Dict[str, Any]] = self._fix_questions_format(qs.copy())
         self.questions: List[Dict[str, Any]] = self._base_questions.copy()
         if self.shuffle:
             random.shuffle(self.questions)
@@ -63,6 +67,13 @@ class InTestWindow(ctk.CTkToplevel):
     def _unblock_main_window(self):
         self.MainWindow.set_navigation_toggled(True)
         self.MainWindow.frames["tests"].unlock_input()
+        self.MainWindow.select_frame_by_name("tests")
+
+    def _fix_questions_format(self, questions):
+        for question in questions:
+            if question["type"] in ["multiple_choice", "multi_select"]:
+                question["options"] = [str(option) for option in question["options"]]
+        return questions
 
     def _build_header(self):
         for w in self.header_frame.winfo_children():
@@ -74,6 +85,11 @@ class InTestWindow(ctk.CTkToplevel):
 
         self.title_label = ctk.CTkLabel(self.header_frame, text=title, font=ctk.CTkFont(size=18, weight="bold"))
         self.title_label.grid(row=0, column=0, padx=5, pady=(0, 4), sticky="w")
+
+        self.print_btn = ctk.CTkButton(self.header_frame, text="Распечатать",
+                                       command=lambda: PrintSettingsDialog(self, self.config_data, self.answers),
+                                       width=120)
+        self.print_btn.grid(row=0, column=1, padx=5, pady=(5, 4), sticky="e")
 
         total = max(1, len(self.questions))
         without_answer = self._count_without_answer()
@@ -369,3 +385,208 @@ class InTestWindow(ctk.CTkToplevel):
         finally:
             self.grab_release()
             self.destroy()
+
+    def _open_print_settings(self):
+        PrintSettingsDialog(self, self.config_data, self.answers)
+
+    def _generate_print_html(self, include_answers: bool, selected_indices: List[int]) -> str:
+        title = self.config_data.get("title", "Тест")
+        if self._normalize_text(title) == "название теста (короткое)":
+            title = "Тест"
+
+        html = f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{htmlL.escape(title)}</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }}
+        h1 {{ text-align: center; }}
+        .question {{ margin: 20px 0; page-break-inside: avoid; }}
+        .question-text {{ font-weight: bold; margin-bottom: 10px; }}
+        .options {{ margin-left: 20px; }}
+        .option {{ margin: 5px 0; }}
+        .answer {{ margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 5px; }}
+        .correct {{ color: green; font-weight: bold; }}
+        .answers-page {{ page-break-before: always; margin-top: 50px; }}
+        @media print {{ body {{ margin: 0; }} }}
+    </style>
+</head>
+<body>
+    <h1>{htmlL.escape(title)}</h1>
+"""
+
+        for idx in selected_indices:
+            if idx >= len(self.questions):
+                continue
+            q = self.questions[idx]
+            q_text = q.get("text", "")
+            q_type = q.get("type", "entry")
+            options = q.get("options", [])
+
+            html += f'<div class="question">\n'
+            html += f'  <div class="question-text">{idx + 1}. {htmlL.escape(q_text)}</div>\n'
+
+            if q_type in ("multiple_choice", "multi_select"):
+                html += '  <div class="options">\n'
+                for i, opt in enumerate(options):
+                    html += f'    <div class="option">{chr(1040 + i)}) {htmlL.escape(str(opt))}</div>\n'
+                html += '  </div>\n'
+
+            html += '</div>\n'
+
+        if include_answers:
+            html += '<div class="answers-page">\n'
+            html += '  <h1>Ответы</h1>\n'
+            for idx in selected_indices:
+                if idx >= len(self.questions):
+                    continue
+                q = self.questions[idx]
+                q_text = q.get("text", "")
+                q_type = q.get("type", "entry")
+                options = q.get("options", [])
+                correct = q.get("correct", [])
+                explanation = q.get("explanation", "")
+
+                html += f'<div class="question">\n'
+                html += f'  <div class="question-text">{idx + 1}. {htmlL.escape(q_text)}</div>\n'
+                html += '  <div class="answer">\n'
+                html += '    <strong>Правильный ответ:</strong> '
+                if q_type == "multiple_choice":
+                    if isinstance(correct, list) and correct:
+                        ans_idx = int(correct[0]) if isinstance(correct[0], (int, str)) else 0
+                        if 0 <= ans_idx < len(options):
+                            html += f'{chr(1040 + ans_idx)}) {htmlL.escape(str(options[ans_idx]))}'
+                    elif isinstance(correct, int) and 0 <= correct < len(options):
+                        html += f'{chr(1040 + correct)}) {htmlL.escape(str(options[correct]))}'
+                elif q_type == "multi_select":
+                    if isinstance(correct, list):
+                        ans_texts = []
+                        for c in correct:
+                            try:
+                                c_idx = int(c)
+                                if 0 <= c_idx < len(options):
+                                    ans_texts.append(f'{chr(1040 + c_idx)}) {htmlL.escape(str(options[c_idx]))}')
+                            except (ValueError, TypeError):
+                                pass
+                        html += ', '.join(ans_texts) if ans_texts else htmlL.escape(str(correct))
+                else:
+                    if isinstance(correct, list):
+                        html += ', '.join(htmlL.escape(str(c)) for c in correct)
+                    else:
+                        html += htmlL.escape(str(correct))
+                
+                if explanation:
+                    html += f'<br><strong>Пояснение:</strong> {htmlL.escape(explanation)}'
+                html += '</div>\n'
+            html += '</div>\n'
+
+        html += '</body>\n</html>'
+        return html
+
+    def _print_test(self, include_answers: bool, selected_indices: List[int]):
+        html_content = self._generate_print_html(include_answers, selected_indices)
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
+            f.write(html_content)
+            temp_path = f.name
+        
+        try:
+            webbrowser.open(f'file:///{temp_path.replace(os.sep, "/")}')
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Печать)",
+                          message="Открыт браузер с тестом. Нажмите Ctrl+P для печати или используйте меню печати браузера.",
+                          icon="info")
+        except Exception as e:
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Ошибка печати)", message=f"Не удалось открыть браузер: {e}", icon="cancel")
+            if self.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка печати: {e}")
+        finally:
+            self.after(5000, lambda: os.unlink(temp_path) if os.path.exists(temp_path) else None)
+
+
+class PrintSettingsDialog(ctk.CTkToplevel):
+    def __init__(self, parent_window: InTestWindow, config: Dict[str, Any], answers: Dict[str, Any]):
+        super().__init__(master=parent_window)
+        self.parent = parent_window
+        self.config = config
+        self.answers = answers
+        self.questions = parent_window.questions
+        
+        self.title("Настройки печати")
+        self.geometry("500x600")
+        self.grab_set()
+        self.focus()
+        self.resizable(False, False)
+        self.after(100, lambda: self.iconbitmap(resource_path(ICON_PATH)))
+        
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        
+        self.header_frame = ctk.CTkFrame(self)
+        self.header_frame.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
+        self.header_frame.grid_columnconfigure(0, weight=1)
+        
+        self.scroll_frame = ctk.CTkScrollableFrame(self)
+        self.scroll_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
+        self.scroll_frame.grid_columnconfigure(0, weight=1)
+        
+        self.actions_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.actions_frame.grid(row=2, column=0, padx=10, pady=(5, 10), sticky="ew")
+        self.actions_frame.grid_columnconfigure(0, weight=1)
+        
+        self._build_header()
+        self._build_question_list()
+        self._build_actions()
+    
+    def _build_header(self):
+        self.include_answers_var = ctk.BooleanVar(value=False)
+        self.cb_answers = ctk.CTkCheckBox(self.header_frame, text="Печатать ответы и пояснения", 
+                                          variable=self.include_answers_var)
+        self.cb_answers.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        
+        self.select_all_var = ctk.BooleanVar(value=True)
+        self.cb_select_all = ctk.CTkCheckBox(self.header_frame, text="Выбрать все вопросы",
+                                             variable=self.select_all_var, command=self._toggle_all)
+        self.cb_select_all.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="w")
+    
+    def _build_question_list(self):
+        self.question_vars = []
+        for i, q in enumerate(self.questions):
+            var = ctk.BooleanVar(value=True)
+            self.question_vars.append(var)
+            
+            q_text = q.get("text", "")
+            truncated = q_text[:80] + "..." if len(q_text) > 80 else q_text
+            
+            frame = ctk.CTkFrame(self.scroll_frame, fg_color="transparent")
+            frame.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
+            frame.grid_columnconfigure(1, weight=1)
+            
+            cb = ctk.CTkCheckBox(frame, text="", variable=var)
+            cb.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+            
+            lbl = ctk.CTkLabel(frame, text=f"{i + 1}. {truncated}", wraplength=350, justify="left", anchor="w")
+            lbl.grid(row=0, column=1, padx=(2, 5), pady=5, sticky="ew")
+    
+    def _build_actions(self):
+        self.print_btn = ctk.CTkButton(self.actions_frame, text="Печать", command=self._on_print,
+                                       fg_color="#2E8BC0", hover_color="#1E6B90")
+        self.print_btn.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+        
+        self.cancel_btn = ctk.CTkButton(self.actions_frame, text="Отмена", command=self.destroy)
+        self.cancel_btn.grid(row=0, column=1, padx=(0, 10), pady=10, sticky="ew")
+    
+    def _toggle_all(self):
+        value = self.select_all_var.get()
+        for var in self.question_vars:
+            var.set(value)
+    
+    def _on_print(self):
+        selected_indices = [i for i, var in enumerate(self.question_vars) if var.get()]
+        
+        if not selected_indices:
+            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Печать)", message="Выберите хотя бы один вопрос для печати.", icon="warning")
+            return
+        
+        include_answers = self.include_answers_var.get()
+        self.parent._print_test(include_answers, selected_indices)
+        self.after(100, self.destroy)

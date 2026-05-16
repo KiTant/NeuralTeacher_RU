@@ -11,7 +11,7 @@ APP_NAME = "NeuralTeacher"
 DISPLAY_APP_NAME = "НейроУчитель"
 REPO_NAME = APP_NAME + "_RU"
 ICON_PATH = 'assets/graduation-cap.ico'
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 IS_WIN7 = False  # При запуске проекта на Windows 7 нужно поставить на True
 DEFAULT_CTKCODEBOX_KEYBINDINGS = KeybindingSettings(B__on_backtick="") if IS_WIN7 else KeybindingSettings()
 
@@ -27,9 +27,9 @@ ORPK = ["a6089edef857be8b734a2949eb9a07b97e47e5d15178581050bde0aa65dfb347",
 ORPK = ("".join(ORPK))[::-1]  # Этот ключ был создан специально для общего пользования (в НейроУчителе)
 
 FRAMES = (("navigation", "navigation_frame", "NavigationFrame"), ("tests", "tests_frame", "TestsFrame"),
-          ("homework", "homework_frame", "HomeworkFrame"), ("explanation", "explanation_frame", "ExplanationFrame"),
-          ("settings", "settings_frame", "SettingsFrame"), ("about", "about_frame", "AboutFrame"),
-          ("website", "website_frame", "WebsiteFrame"))  # (ключ, имя атрибута, класс)
+          ("explanation", "explanation_frame", "ExplanationFrame"), ("homework", "homework_frame", "HomeworkFrame"),
+          ("website", "website_frame", "WebsiteFrame"), ("settings", "settings_frame", "SettingsFrame"),
+          ("about", "about_frame", "AboutFrame"))  # (ключ, имя атрибута, класс)
 
 APPDATA = os.getenv('APPDATA')
 FILES = {
@@ -84,11 +84,26 @@ DEFAULT_SETTINGS = {
     "ai_model": "GPT-4",
     "provider": "Yqcloud",
     "tray_icon": "Enabled",
+    "proxy": "",
+    "auto_theory_tools": "Enabled",
     "PAIK": "",
     "ORK": "",
     "OllK": "",
-    "HFK": ""
+    "HFK": "",
+    "AAK": ""
 }
+
+SETTINGS_INFO = {"logging": ["CheckBox", "logging", "Логирование (в файл)"],
+                 "keybinds": ["CheckBox", "keybinds", "Горячие клавиши"],
+                 "auto_update": ["CheckBox", "auto_update_check", "Автопроверка обновлений"],
+                 "hw_load": ["CheckBox", "auto_homework_load", "Автозагрузка чатов ДЗ"],
+                 "hw_save": ["CheckBox", "auto_homework_save", "Автосохранение чатов ДЗ"],
+                 "expl_load": ["CheckBox", "auto_explanation_load", "Автозагрузка чатов объяснений"],
+                 "expl_save": ["CheckBox", "auto_explanation_save", "Автосохранение чатов объяснений"],
+                 "tray_icon": ["CheckBox", "tray_icon", "Иконка в трее (после закрытия программы)"],
+                 "theory_auto_open": ["CheckBox", "auto_theory_tools", "Автоматическое открытие окна с теорией и инструментами"],
+                 "proxy": ["Entry", "proxy", "Прокси", "Пример: http://user:pass@host:port"]
+                 }
 
 
 def get_provider_map():

@@ -1,9 +1,9 @@
 import customtkinter
 from customtkinter.windows.widgets.theme.theme_manager import ThemeManager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from CTkListbox import CTkListbox
 from utils.variables import (MAIN_THEMES, MODEL_MAP, DEFAULT_SETTINGS, FILES, MAIN_THEMES_TRANSLATED,
-                             PROVIDER_MAP, resource_path)
+                             PROVIDER_MAP, resource_path, SETTINGS_INFO)
 from g4f import Provider
 from utils.helpers import entry_keybinds_normalize
 from utils.settings_manager import *
@@ -76,44 +76,38 @@ class SettingsFrame(customtkinter.CTkFrame):
         self.right_frame.grid(row=0, column=1, padx=(0, 20), pady=20, sticky="nsew")
         self.right_frame.grid_columnconfigure(0, weight=1)
 
-        self.toggles_title = customtkinter.CTkLabel(self.right_frame, text="Поведение приложения",
-                                                    font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.toggles_title.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")
+        self.more_settings_title = customtkinter.CTkLabel(self.right_frame, text="Поведение приложения",
+                                                          font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.more_settings_title.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")
 
-        self.cb_logging = customtkinter.CTkCheckBox(self.right_frame, text="Логирование (в файл)",
-                                                    command=lambda: self._on_toggle("logging", self.cb_logging))
-        self.cb_keybinds = customtkinter.CTkCheckBox(self.right_frame, text="Горячие клавиши (скоро)",
-                                                     command=lambda: self._on_toggle("keybinds", self.cb_keybinds))
-        self.cb_auto_update = customtkinter.CTkCheckBox(self.right_frame, text="Автопроверка обновлений",
-                                                        command=lambda: self._on_toggle("auto_update_check", self.cb_auto_update))
-        self.cb_hw_load = customtkinter.CTkCheckBox(self.right_frame, text="Автозагрузка чатов ДЗ",
-                                                    command=lambda: self._on_toggle("auto_homework_load", self.cb_hw_load))
-        self.cb_hw_save = customtkinter.CTkCheckBox(self.right_frame, text="Автосохранение чатов ДЗ",
-                                                    command=lambda: self._on_toggle("auto_homework_save", self.cb_hw_save))
-        self.cb_expl_load = customtkinter.CTkCheckBox(self.right_frame, text="Автозагрузка чатов объяснений",
-                                                      command=lambda: self._on_toggle("auto_explanation_load", self.cb_expl_load))
-        self.cb_expl_save = customtkinter.CTkCheckBox(self.right_frame, text="Автосохранение чатов объяснений",
-                                                      command=lambda: self._on_toggle("auto_explanation_save", self.cb_expl_save))
-        self.cb_tray_icon = customtkinter.CTkCheckBox(self.right_frame, text="Иконка в трее (после закрытия программы)",
-                                                      command=lambda: self._on_toggle("tray_icon", self.cb_tray_icon))
+        self.more_settings_scroll_frame = customtkinter.CTkScrollableFrame(self.right_frame)
+        self.more_settings_scroll_frame.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")
+        self.more_settings_scroll_frame.grid_columnconfigure(0, weight=1)
+        self.right_frame.grid_rowconfigure(1, weight=1)
 
-        self.cb_logging.grid(row=1, column=0, padx=10, pady=4, sticky="w")
-        self.cb_keybinds.grid(row=2, column=0, padx=10, pady=4, sticky="w")
-        self.cb_auto_update.grid(row=3, column=0, padx=10, pady=4, sticky="w")
-        self.cb_hw_load.grid(row=4, column=0, padx=10, pady=4, sticky="w")
-        self.cb_hw_save.grid(row=5, column=0, padx=10, pady=4, sticky="w")
-        self.cb_expl_load.grid(row=6, column=0, padx=10, pady=4, sticky="w")
-        self.cb_expl_save.grid(row=7, column=0, padx=10, pady=4, sticky="w")
-        self.cb_tray_icon.grid(row=8, column=0, padx=10, pady=4, sticky="w")
+        add = 0
+        for i, (elem, elemInfo) in enumerate(SETTINGS_INFO.items()):
+            name = None
+            if elemInfo[0] == "CheckBox":
+                name = f"cb_{elem}"
+                setattr(self, name, customtkinter.CTkCheckBox(self.more_settings_scroll_frame, text=elemInfo[2],
+                                                              command=lambda name=name, elemInfo=elemInfo: self._on_toggle(elemInfo[1], name)))
+                getattr(self, name).grid(row=i+add, column=0, padx=10, pady=4, sticky="w")
+            elif elemInfo[0] == "Entry":
+                title_name, name = f"{elem}_title", f"{elem}_entry"
+                setattr(self, title_name, customtkinter.CTkLabel(self.more_settings_scroll_frame, text=elemInfo[2],
+                                                                 font=customtkinter.CTkFont(size=15, weight="bold")))
+                getattr(self, title_name).grid(row=i+add, column=0, padx=10, pady=(10, 5), sticky="w")
+                add += 1
+                setattr(self, name, customtkinter.CTkEntry(self.more_settings_scroll_frame, placeholder_text=elemInfo[3]))
+                getattr(self, name).grid(row=i+add, column=0, padx=10, pady=(0, 10), sticky="nsew")
+                getattr(self, name).bind("<KeyRelease>",
+                                         lambda x, name=name, elemInfo=elemInfo: self._on_entry_change(elemInfo[1], name),
+                                         add="+")
+                entry_keybinds_normalize(getattr(self, name))
+            self.setting_ui_elements[getattr(self, name)] = (elemInfo[0], elemInfo[1])
+        del add
 
-        self.setting_ui_elements[self.cb_logging] = ("CheckBox", "logging")
-        self.setting_ui_elements[self.cb_keybinds] = ("CheckBox", "keybinds")
-        self.setting_ui_elements[self.cb_auto_update] = ("CheckBox", "auto_update_check")
-        self.setting_ui_elements[self.cb_hw_load] = ("CheckBox", "auto_homework_load")
-        self.setting_ui_elements[self.cb_hw_save] = ("CheckBox", "auto_homework_save")
-        self.setting_ui_elements[self.cb_expl_load] = ("CheckBox", "auto_explanation_load")
-        self.setting_ui_elements[self.cb_expl_save] = ("CheckBox", "auto_explanation_save")
-        self.setting_ui_elements[self.cb_tray_icon] = ("CheckBox", "tray_icon")
         self.setting_ui_elements[self.provider_key_entry] = ("Entry",
                                                              PROVIDER_MAP[getattr(Provider,
                                                                                   self.MainWindow.settings["provider"],
@@ -122,7 +116,7 @@ class SettingsFrame(customtkinter.CTkFrame):
         self.after(250, self._set_vars)
 
         self.actions_frame = customtkinter.CTkFrame(self.right_frame, fg_color="transparent")
-        self.actions_frame.grid(row=9, column=0, padx=10, pady=(10, 5), sticky="ew")
+        self.actions_frame.grid(row=2, column=0, padx=10, pady=(10, 5), sticky="ew")
         self.actions_frame.grid_columnconfigure((0, 1), weight=1)
 
         self.btn_save_apply = customtkinter.CTkButton(self.actions_frame, text="Сохранить действующие",
@@ -137,12 +131,12 @@ class SettingsFrame(customtkinter.CTkFrame):
                                                         f"Можно получить на сайте провайдера, который легко найти в поисковике по названию. "
                                                         f'В "О программе" есть пример получения API ключа',
                                                    font=customtkinter.CTkFont(size=16, weight="bold"), justify="left", wraplength=500)
-        self.api_key_desc.grid(row=10, column=0, padx=0, pady=5, sticky="w")
+        self.api_key_desc.grid(row=3, column=0, padx=0, pady=5, sticky="w")
 
         self.provider_desc = customtkinter.CTkLabel(self.right_frame,
                                                     text=f"Инфо о выбранном провайдере: ...",
                                                     font=customtkinter.CTkFont(size=16, weight="bold"), justify="left", wraplength=500)
-        self.provider_desc.grid(row=11, column=0, padx=0, pady=5, sticky="w")
+        self.provider_desc.grid(row=4, column=0, padx=0, pady=5, sticky="w")
 
     @staticmethod
     def _set_checkbox_from_setting(checkbox: customtkinter.CTkCheckBox, value: str):
@@ -196,11 +190,13 @@ class SettingsFrame(customtkinter.CTkFrame):
                 self.provider_key_title.grid_forget()
                 self.provider_key_entry.grid_forget()
 
-    def _on_toggle(self, key: str, checkbox: customtkinter.CTkCheckBox):
-        self.MainWindow.settings[key] = "Enabled" if bool(checkbox.get()) else "Disabled"
+    def _on_toggle(self, key: str, checkbox: Union[customtkinter.CTkCheckBox, str]):
+        value = checkbox.get() if not isinstance(checkbox, str) else getattr(self, checkbox).get()
+        self.MainWindow.settings[key] = "Enabled" if bool(value) else "Disabled"
 
-    def _on_entry_change(self, key: str, entry: customtkinter.CTkEntry):
-        self.MainWindow.settings[key] = entry.get() if entry.get().strip() != "" else ""
+    def _on_entry_change(self, key: str, entry: Union[customtkinter.CTkEntry, str]):
+        value = entry.get().strip() if not isinstance(entry, str) else getattr(self, entry).get().strip()
+        self.MainWindow.settings[key] = value
 
     def _save_settings(self):
         settings_save(self.MainWindow, FILES.get("settings_file"))

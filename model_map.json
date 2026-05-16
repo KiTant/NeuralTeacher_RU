@@ -6,6 +6,7 @@
     "PollinationsAI": "openai-large"
   },
   "GPT OSS 120B": {
+    "ApiAirforce": "gpt-oss-120b",
     "OpenRouter": "openai/gpt-oss-120b:free",
     "Ollama": "gpt-oss:120b-cloud",
     "DeepInfra": "openai/gpt-oss-120b",
@@ -23,8 +24,8 @@
     "Ollama": "glm-5.1:cloud",
     "HuggingFace": "zai-org/GLM-5.1"
   },
-  "Step 3.5 Flash": {
-    "DeepInfra": "stepfun-ai/Step-3.5-Flash"
+  "Qwen 3.6 Plus": {
+    "PollinationsAI": "qwen-large"
   },
   "MiniMax M2.7": {
     "Ollama": "minimax-m2.7:cloud",
@@ -37,17 +38,26 @@
     "Ollama": "minimax-m2.5:cloud",
     "DeepInfra": "MiniMaxAI/MiniMax-M2.5"
   },
+  "Deepseek V4 Pro": {
+    "DeepInfra": "deepseek-ai/DeepSeek-V4-Pro",
+    "HuggingFace": "deepseek-ai/DeepSeek-V4-Pro",
+    "Ollama": "deepseek-v4-pro:cloud"
+  },
   "Deepseek V4 Flash": {
+    "OpenRouter": "deepseek/deepseek-v4-flash:free",
+    "PollinationsAI": "deepseek",
     "DeepInfra": "deepseek-ai/DeepSeek-V4-Flash",
     "Ollama": "deepseek-v4-flash:cloud",
     "HuggingFace": "deepseek-ai/DeepSeek-V4-Flash"
   },
   "Deepseek V3.2": {
+    "ApiAirforce": "deepseek-v3.2",
     "DeepInfra": "deepseek-ai/DeepSeek-V3.2",
     "Ollama": "deepseek-v3.2:cloud",
     "HuggingFace": "deepseek-ai/DeepSeek-V3.2"
   },
   "Kimi K2.6": {
+    "ApiAirforce": "kimi-k2.6-thinking",
     "DeepInfra": "moonshotai/Kimi-K2.6",
     "HuggingFace": "moonshotai/Kimi-K2.6",
     "Ollama": "kimi-k2.6:cloud",
@@ -68,12 +78,16 @@
     "PollinationsAI": "openai"
   },
   "Gemini 2.5 Flash Lite": {
+    "ApiAirforce": "gemini-2.5-flash",
     "PollinationsAI": "gemini-fast"
   },
   "Nemotron 3 Super": {
     "OpenRouter": "nvidia/nemotron-3-super-120b-a12b:free",
     "DeepInfra": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
     "Ollama": "nemotron-3-super:cloud"
+  },
+  "Step 3.5 Flash": {
+    "DeepInfra": "stepfun-ai/Step-3.5-Flash"
   },
   "GPT-5 Nano": {
     "PollinationsAI": "openai-fast"

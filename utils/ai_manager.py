@@ -46,15 +46,20 @@ def get_ai_response(Window: "AssistantChatFrame", conversation_history, model, p
         if system_prompt:
             clean_history.insert(0, {"role": "system", "content": system_prompt})
         api_key = get_api_key(Window, provider)
-        response = ChatCompletion.create(model=model, messages=clean_history, provider=provider, stream=False, api_key=api_key)
+        proxy = Window.MainWindow.settings.get("proxy", "").strip() or None
+        response = ChatCompletion.create(model=model, messages=clean_history, provider=provider, stream=False, api_key=api_key, proxy=proxy)
         ai_response = response if isinstance(response, str) else str(response)
         ai_response_data = {"role": "assistant", "content": ai_response, "is_edited": False,
                             "type": "text", "model_name": model_name}
     except Exception as e:
         if Window.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка при получении ответа от ИИ: {e}; {model}; {provider}")
+        if str(e).startswith("Invalid scheme component"):
+            problem = "Проблема с прокси, который установлен в настройках"
+        else:
+            problem = e
         ai_response_data = {"role": APP_NAME,
                             "content": f"Ошибка при попытке получить ответ от ИИ:"
-                                       f" {e}\nПопробуйте выбрать другую модель. "
+                                       f" {problem}\nПопробуйте выбрать другую модель. "
                                        f"Будет лучше, если вы удалите это сообщение", "is_edited": False,
                             "type": "text", "model_name": model_name}
     Window.after(0, Window.display_ai_response, ai_response_data)
@@ -156,7 +161,8 @@ def request_test_config(Window, request_dict: dict, on_config=None):
                 {"role": "user", "content": user_prompt}
             ]
             api_key = get_api_key(Window, provider)
-            resp = ChatCompletion.create(model=model, messages=messages, provider=provider, stream=False, api_key=api_key)
+            proxy = Window.MainWindow.settings.get("proxy", "").strip() or None
+            resp = ChatCompletion.create(model=model, messages=messages, provider=provider, stream=False, api_key=api_key, proxy=proxy)
             ai_response = resp if isinstance(resp, str) else str(resp)
             config = parse_json_safely(ai_response)
             if not isinstance(config, dict):
@@ -175,15 +181,20 @@ def request_test_config(Window, request_dict: dict, on_config=None):
                     except Exception as e:
                         if Window.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка открытия окна теста: "
                                                                                                 f"{e}; {model}; {provider}\nКонфиг:{config}")
+                        if test_w: test_w.destroy()
                         Window.unlock_input()
-                        test_w.destroy()
+                        Window.MainWindow.set_navigation_toggled(True)
+                        Window.MainWindow.select_frame_by_name("tests")
                         CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка открытия окна теста: {e}", icon="cancel")
 
-            handle()
+            Window.after(0, handle)
         except Exception as e:
             if Window.MainWindow.settings["logging"] == "Enabled": Logger.log_error(f"Ошибка генерации конфига теста: {e}; {model}; {provider};")
             Window.unlock_input()
-            CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка генерации конфига: {e}", icon="cancel")
+            if str(e).startswith("Invalid scheme component"):
+                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка генерации конфига: Проблема с прокси, который установлен в настройках", icon="cancel")
+            else:
+                CTkMessagebox(title=f"{DISPLAY_APP_NAME} (Тест)", message=f"Ошибка генерации конфига: {e}", icon="cancel")
 
     threading.Thread(target=worker, daemon=True).start()
 

@@ -17,10 +17,12 @@ def open_window():
 class WebsiteFrame(customtkinter.CTkFrame):
     def __init__(self, MainWindow: "MainWindowClass"):
         super().__init__(master=MainWindow)
+        self.web_start = customtkinter.CTkButton(self, text="Открыть окно с теорией и инструментами", command=self.start)
+        self.web_start.grid(row=0, column=0, padx=20, pady=(15, 5), sticky="w")
         self.web_info = customtkinter.CTkLabel(self, text="Окно открывается не сразу (около 2-3 секунд). Закрывается около 3-4 секунд",
                                                font=customtkinter.CTkFont(size=16, weight="bold"),
                                                justify="left", wraplength=750)
-        self.web_info.grid(row=0, column=0, padx=20, pady=(15, 5), sticky="w")
+        self.web_info.grid(row=1, column=0, padx=20, pady=(15, 5), sticky="w")
         self.browser_process: Union[multiprocessing.Process, None] = None
 
     def close_window(self):
@@ -31,8 +33,8 @@ class WebsiteFrame(customtkinter.CTkFrame):
         else:
             return
 
-    def start(self):
-        if self.browser_process is None or not self.browser_process.is_alive():
+    def start(self, auto: bool = True):
+        if (self.browser_process is None or not self.browser_process.is_alive()) and auto:
             self.browser_process = multiprocessing.Process(target=open_window, daemon=True)
             self.browser_process.start()
         else:

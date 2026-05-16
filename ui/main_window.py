@@ -2,6 +2,7 @@ import customtkinter as ctk
 import pystray
 import threading
 from PIL import Image
+from CTkCodeBoxPlus import register_keybind
 from utils.settings_manager import settings_load
 from utils.updater import check_last_version
 from utils.variables import (DEFAULT_SETTINGS, FILES, APPEARANCE_MODES, ICON_PATH, MODEL_MAP,
@@ -48,9 +49,14 @@ class MainWindow(ctk.CTk):
         self.frames = {}
         if self.settings["logging"] == "Enabled": Logger.log_action("Создание фреймов...")
         self.create_frames()
+        self.after(250, self.bind_frames)
 
         if self.settings["auto_update_check"] == "Enabled":
             check_last_version(self, True)
+
+    def bind_frames(self):
+        for i, (key, attr_name, class_name) in enumerate(FRAMES[1:]):
+            register_keybind(self, f"Ctrl+{i+1}", lambda key=key: self.select_frame_by_name(key, bind=True))
 
     def create_frames(self):
         if getattr(self, "frames", None):
@@ -68,7 +74,8 @@ class MainWindow(ctk.CTk):
                 self.frames[key] = getattr(self, attr_name)
             if self.settings["logging"] == "Enabled": Logger.log_info("Фреймы созданы")
 
-    def select_frame_by_name(self, name, even_if_disabled: bool = False):
+    def select_frame_by_name(self, name, even_if_disabled: bool = False, bind: bool = False):
+        if bind and self.settings["keybinds"] == "Disabled": return
         for buttonName, button in self.frames["navigation"].buttons.items():
             if name == buttonName and not even_if_disabled and button.cget("state") == "disabled":
                 return
@@ -76,7 +83,7 @@ class MainWindow(ctk.CTk):
         for frameName, frame in self.frames.items():
             if name == frameName:
                 frame.grid(row=0, column=1, sticky="nsew")
-                if frameName == "website": frame.start()
+                if frameName == "website": frame.start(False if self.settings["auto_theory_tools"] == "Disabled" else True)
             elif frameName != "navigation":
                 frame.grid_forget()
 
